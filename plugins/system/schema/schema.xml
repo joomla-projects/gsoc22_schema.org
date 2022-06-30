@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="install">
+	<name>plg_system_schema</name>
+	<author>Shazma Siddiqui</author>
+	<creationDate>June 2022</creationDate>
+	<authorEmail>siddiquishaz7@gmail.com</authorEmail>
+	<version>1.0.0</version>
+	<description>PLG_SYSTEM_SCHEMA_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="schema">schema.php</filename>
+		<folder>forms</folder>
+		<folder>sql</folder>
+	</files>
+	<languages>
+		<language tag="en-GB">language/en-GB/plg_system_schema.ini</language>
+		<language tag="en-GB">language/en-GB/plg_system_schema.sys.ini</language>
+	</languages>
+	<install>
+     <sql>
+         <file driver="mysql" charset="utf8">sql/mysql/install.mysql.utf8.sql</file>
+         <file driver="sqlazure" charset="utf8">sql/sqlazure/install.sqlazure.utf8.sql</file>
+     </sql>
+	</install>
+	<uninstall>
+		<sql>
+			<file driver="mysql" charset="utf8">sql/mysql/uninstall.mysql.utf8.sql</file>
+			<file driver="sqlazure" charset="utf8">sql/sqlazure/uninstall.sqlazure.utf8.sql</file>
+		</sql>
+	</uninstall>
+</extension>
+

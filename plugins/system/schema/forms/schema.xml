@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="schema">
+		<fieldset
+			name="schema"
+			label="Schema"
+		>
+			<field
+				name="articleId"
+				type="hidden"
+				filter="string"
+				size="30"
+				required="0"
+			/>
+
+			<field
+				name="testField"
+				type="text"
+				label="Test Field"
+				filter="string"
+				size="30"
+				required="0"
+			/>
+
+		</fieldset>
+	</fields>
+</form>
