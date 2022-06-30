@@ -210,35 +210,25 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	 */
 	public function onBeforeCompileHead()
 	{
-		$context = $this->app;
-		if (!$this->app->isClient('Site') && $context === 'com_content.article') {
+		$context = $this->app->input->get('option').'.'.$this->app->input->get('view');
+
+		if (!$this->app->isClient('site') || $context != 'com_content.article') {
 			return;
 		}
 
-		// $this->app->getDocument()->addScriptDeclaration('
-		// 		alert("Script Added");
-		// ');
+		$articleId=$this->app->input->getInt('id');
+
+		// Load the table data from the database
+		$db = $this->db;
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($db->quoteName('#__schemaorg'))
+			->where('articleId = '.$articleId);
+		$db->setQuery($query);
+		$results = $db->loadAssoc();
+
+		$this->app->getDocument()->addScriptDeclaration(json_encode($results));
 
 	}
 
-	/**
-	 * Manipulate the generic list view
-	 *
-	 * @param   DisplayEvent    $event
-	 *
-	 * @since   4.0.0
-	 */
-	// public function onAfterDisplay(DisplayEvent $event)
-	// {
-	// 	$context = $event->getArgument('extension');
-
-	// 	if (!$this->app->isClient('site') || $context != 'com_content.article') {
-	// 		return;
-	// 	}
-
-	// 	$article=$event->getArgument('source');
-
-	// 	$this->app->getDocument()->addScriptDeclaration('demo');
-
-	// }
 }
