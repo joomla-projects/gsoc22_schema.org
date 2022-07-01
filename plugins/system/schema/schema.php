@@ -10,7 +10,6 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
-use Joomla\CMS\Event\View\DisplayEvent;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\EventInterface;
@@ -29,7 +28,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	 *
 	 */
 	protected $db;
-	
+
 	/**
 	 * Load the language file on instantiation.
 	 *
@@ -86,51 +85,44 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 		$data = $event->getArgument('1');
 
 		// Check we are manipulating a valid form.
-		if (!in_array($context, ['com_content.article']))
-		{
+		if (!in_array($context, ['com_content.article'])) {
 			return true;
 		}
 
-		if (is_object($data))
-		{
+		if (is_object($data)) {
 			$articleId = $data->id ?? 0;
 
 			//Check if the form already has some data
-			if (!isset($data->schema) && $articleId > 0)
-			{
+			if (!isset($data->schema) && $articleId > 0) {
 				// Load the table data from the database
 				$db = $this->db;
 				$query = $db->getQuery(true)
 					->select('*')
 					->from($db->quoteName('#__schemaorg'))
-					->where('articleId = '.$articleId);
+					->where('articleId = ' . $articleId);
 				$db->setQuery($query);
 				$results = $db->loadAssoc();
 
 				// Insert existing data into form fields
 				$data->schema = [];
-				if(is_array($results)||is_object($results)){
-					foreach ($results as $k=>$v)
-					{
-						$data->schema[$k]=$v;
+				if (is_array($results) || is_object($results)) {
+					foreach ($results as $k => $v) {
+						$data->schema[$k] = $v;
 					}
-				}
-				else{
+				} else {
 					//Insert article id as it is a hidden field
 					$data->schema = [];
-					$data->schema['articleId']=$articleId;
+					$data->schema['articleId'] = $articleId;
 				}
-			}
-			else{
+			} else {
 				//Insert article id as it is a hidden field
 				$data->schema = [];
-				$data->schema['articleId']=$articleId;
+				$data->schema['articleId'] = $articleId;
 			}
 		}
 		return true;
+	}
 
-	}	
-	
 	/**
 	 * The form event.
 	 *
@@ -141,23 +133,22 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	public function onContentPrepareForm(EventInterface $event)
 	{
 		$form = $event->getArgument('0');
-		
+
 		// Check we are manipulating a valid form
 		$context = $form->getName();
 
-		if (!in_array($context, ['com_content.article']))
-		{
+		if (!in_array($context, ['com_content.article'])) {
 			return true;
 		}
 
 		//Load the form fields
 		FormHelper::addFormPath(__DIR__ . '/forms');
 		$form->loadFile('schema');
-		
+
 		return true;
 	}
 
-/**
+	/**
 	 * Saves form field data in the database
 	 *
 	 * @param   EventInterface $event
@@ -169,8 +160,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	{
 		$context = $event->getArgument('0');
 
-		if (!in_array($context, ['com_content.article']))
-		{
+		if (!in_array($context, ['com_content.article'])) {
 			return true;
 		}
 
@@ -179,25 +169,24 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 		$data = $event->getArgument('3');
 
 		//Check if $data has the form data
-		if (isset($data['schema']) && count($data['schema']))
-		{
+		if (isset($data['schema']) && count($data['schema'])) {
 			$db = $this->db;
 
 			//Delete the existing row to add updated data 
-			if(!$isNew){
-				$res=$db->getQuery(true)
-				->delete($db->quoteName('#__schemaorg'))
-				->where('articleId = '.$article->id);
+			if (!$isNew) {
+				$res = $db->getQuery(true)
+					->delete($db->quoteName('#__schemaorg'))
+					->where('articleId = ' . $article->id);
 				$db->setQuery($res);
 				$result = $db->execute();
 			}
 
 			//Create object to insert data into database
-			$query=new stdClass();
-			foreach($data['schema'] as $k=>$v){
-				$query->$k=$v;
+			$query = new stdClass();
+			foreach ($data['schema'] as $k => $v) {
+				$query->$k = $v;
 			}
-			$result=$db->insertObject('#__schemaorg', $query);
+			$result = $db->insertObject('#__schemaorg', $query);
 		}
 		return true;
 	}
@@ -210,25 +199,26 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	 */
 	public function onBeforeCompileHead()
 	{
-		$context = $this->app->input->get('option').'.'.$this->app->input->get('view');
+		$context = $this->app->input->get('option') . '.' . $this->app->input->get('view');
 
 		if (!$this->app->isClient('site') || $context != 'com_content.article') {
 			return;
 		}
 
-		$articleId=$this->app->input->getInt('id');
+		$articleId = $this->app->input->getInt('id');
 
 		// Load the table data from the database
 		$db = $this->db;
 		$query = $db->getQuery(true)
 			->select('*')
 			->from($db->quoteName('#__schemaorg'))
-			->where('articleId = '.$articleId);
+			->where('articleId = ' . $articleId);
 		$db->setQuery($query);
 		$results = $db->loadAssoc();
 
-		$this->app->getDocument()->addScriptDeclaration(json_encode($results));
+		/** @var Joomla\CMS\WebAsset\WebAssetManager $wa */
+		$wa = $this->app->getDocument()->getWebAssetManager();
+		$wa->addInlineScript(json_encode($results), [], ['type' => 'application/ld+json']);
 
 	}
-
 }
