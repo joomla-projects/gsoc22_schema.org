@@ -14,13 +14,12 @@
 			/>
 
 			<field
-				name="testField"
-				type="text"
-				label="Test Field"
-				filter="string"
-				size="30"
-				required="0"
-			/>
+				name="schemaType"
+				type="list"
+				label="Schema Type"
+				>
+				<option>None</option>
+			</field>
 
 		</fieldset>
 	</fields>

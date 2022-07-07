@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="component" method="upgrade">
+
+    <name>Schemaorg</name>
+    <creationDate>July 2022</creationDate>
+    <author>Shazma Siddiqui</author>
+    <version>0.0.1</version>
+    <description>
+        A Schema.org component
+    </description>
+
+    <namespace path="src/">ShazmaSiddiqui\Component\Schemaorg</namespace>
+            
+    <administration>
+        <menu link="index.php?option=com_schemaorg">Schema.org</menu>
+        <files folder="admin/">
+            <folder>services</folder>
+            <folder>src</folder>
+            <folder>tmpl</folder>
+        </files>
+    </administration>
+
+</extension>
