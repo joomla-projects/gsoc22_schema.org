@@ -3,25 +3,22 @@
 /**
  * @package     Joomla.Plugin
  *
- * @copyright   (C) 2020 Open Source Matters, Inc. <https://www.joomla.org>
+ * @copyright   (C) 2022 Open Source Matters, Inc. <https://www.joomla.org>
  * @license     GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
-use Joomla\CMS\Event\View\DisplayEvent;
-use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\Event\EventInterface;
-use Joomla\Event\SubscriberInterface;
+
 
 /**
  * Schemaorg Plugin
  *
  * @since  4.0.0
  */
-class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
+class PlgSchemaorgRecipe extends CMSPlugin
 {
 
 	/**
@@ -46,19 +43,22 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
 	 */
 	protected $app;
 
-	/**
-	 * Returns an array of events this subscriber will listen to.
+		/**
+	 *  Add a new option to the schema type in the article editing page
 	 *
-	 * @return  array
+	 *  @param   JForm  $form  The form to be altered.
 	 *
-	 * @since   4.0.0
+	 *  @return  boolean
 	 */
-	public static function getSubscribedEvents(): array
+	public function onSchemaPrepareForm($form)
 	{
-		return [
-			
-		];
+		if ($form->getName() != 'com_content.article')
+		{
+			return;
+		}
+
+		$schemaType=$form->getGroup('schema');
+		$schemaType['jform_schema_schemaType']->addOption('Recipe', ['value' => 'recipe']);
 	}
 
-	
 }

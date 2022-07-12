@@ -10,11 +10,12 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
-use Joomla\CMS\Event\View\DisplayEvent;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
+use Joomla\CMS\Event\AbstractEvent;
+use Joomla\CMS\Plugin\PluginHelper;
 
 /**
  * Schemaorg System Plugin
@@ -65,7 +66,6 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	{
 		return [
 			'onBeforeCompileHead'                  => 'onBeforeCompileHead',
-			//'onAfterDisplay'                  => 'onAfterDisplay',
 			'onContentPrepareData'            => 'onContentPrepareData',
 			'onContentPrepareForm'            => 'onContentPrepareForm',
 			'onContentBeforeSave'            => 'onContentBeforeSave',
@@ -85,7 +85,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 		$context = $event->getArgument('0');
 		$data = $event->getArgument('1');
 
-		// Check we are manipulating a valid form.
+		// Check if we are manipulating a valid form.
 		if (!in_array($context, ['com_content.article']))
 		{
 			return true;
@@ -142,7 +142,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 	{
 		$form = $event->getArgument('0');
 		
-		// Check we are manipulating a valid form
+		// Check if we are manipulating a valid form
 		$context = $form->getName();
 
 		if (!in_array($context, ['com_content.article']))
@@ -153,6 +153,16 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 		//Load the form fields
 		FormHelper::addFormPath(__DIR__ . '/forms');
 		$form->loadFile('schema');
+
+		$event   = AbstractEvent::create(
+			'onSchemaPrepareForm',
+			[
+				'subject' => $form,
+			]
+		);
+
+		PluginHelper::importPlugin('schemaorg');
+		$this->app->getDispatcher()->dispatch('onSchemaPrepareForm', $event);
 		
 		return true;
 	}
@@ -218,27 +228,6 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 		// $this->app->getDocument()->addScriptDeclaration('
 		// 		alert("Script Added");
 		// ');
-
 	}
 
-	/**
-	 * Manipulate the generic list view
-	 *
-	 * @param   DisplayEvent    $event
-	 *
-	 * @since   4.0.0
-	 */
-	// public function onAfterDisplay(DisplayEvent $event)
-	// {
-	// 	$context = $event->getArgument('extension');
-
-	// 	if (!$this->app->isClient('site') || $context != 'com_content.article') {
-	// 		return;
-	// 	}
-
-	// 	$article=$event->getArgument('source');
-
-	// 	$this->app->getDocument()->addScriptDeclaration('demo');
-
-	// }
 }

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="schemaorg" method="upgrade">
 	<name>plg_schemaorg_recipe</name>
-	<author>Shazma Siddiqui</author>
-	<creationDate>July 2022</creationDate>
-	<copyright>(C) 2020 Open Source Matters, Inc.</copyright>
+	<author>Joomla! Project</author>
+	<creationDate>June 2022</creationDate>
+	<copyright>(C) 2022 Open Source Matters, Inc.</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
-	<authorEmail>siddiquishaz7@gmail.com</authorEmail>
+	<authorEmail>admin@joomla.org</authorEmail>
 	<authorUrl>www.joomla.org</authorUrl>
-	<version>1.0.0</version>
+	<version>__DEPLOY_VERSION__</version>
 	<description>PLG_SCHEMAORG_RECIPE_XML_DESCRIPTION</description>
 	<files>
 		<filename plugin="recipe">recipe.php</filename>
@@ -17,4 +17,3 @@
 		<language tag="en-GB">language/en-GB/plg_schemaorg_recipe.sys.ini</language>
 	</languages>
 </extension>
-

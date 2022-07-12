@@ -14,8 +14,8 @@ use Joomla\DI\ServiceProviderInterface;
 return new class implements ServiceProviderInterface {
     
     public function register(Container $container): void {
-        $container->registerServiceProvider(new MVCFactory('\\ShazmaSiddiqui\\Component\\Schemaorg'));
-        $container->registerServiceProvider(new ComponentDispatcherFactory('\\ShazmaSiddiqui\\Component\\Schemaorg'));
+        $container->registerServiceProvider(new MVCFactory('\\Joomla\\Component\\Schemaorg'));
+        $container->registerServiceProvider(new ComponentDispatcherFactory('\\Joomla\\Component\\Schemaorg'));
         $container->set(
             ComponentInterface::class,
             function (Container $container) {

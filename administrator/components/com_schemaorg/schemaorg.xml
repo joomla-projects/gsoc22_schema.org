@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="component" method="upgrade">
-
-    <name>Schemaorg</name>
-    <creationDate>July 2022</creationDate>
-    <author>Shazma Siddiqui</author>
-    <version>0.0.1</version>
+    <name>com_schemaorg</name>
+    <author>Joomla! Project</author>
+    <creationDate>June 2022</creationDate>
+    <copyright>(C) 2022 Open Source Matters, Inc.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <authorEmail>admin@joomla.org</authorEmail>
+    <authorUrl>www.joomla.org</authorUrl>
+    <version>__DEPLOY_VERSION__</version>
     <description>
         A Schema.org component
     </description>
-
-    <namespace path="src/">ShazmaSiddiqui\Component\Schemaorg</namespace>
-            
+    <namespace path="src/">Joomla\Component\Schemaorg</namespace>
     <administration>
         <menu link="index.php?option=com_schemaorg">Schema.org</menu>
         <files folder="admin/">
@@ -19,5 +20,4 @@
             <folder>tmpl</folder>
         </files>
     </administration>
-
 </extension>

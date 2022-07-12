@@ -1,6 +1,6 @@
 <?php
 
-namespace ShazmaSiddiqui\Component\Schemaorg\Administrator\Controller;
+namespace Joomla\Component\Schemaorg\Administrator\Controller;
 
 defined('_JEXEC') or die;
 
@@ -10,7 +10,7 @@ use Joomla\CMS\MVC\Controller\BaseController;
  * @package     Joomla.Administrator
  * @subpackage  com_schemaorg
  *
- * @copyright   Copyright (C) 2022 Shazma Siddiqui. All rights reserved.
+ * @copyright   Copyright (C) 2022 Joomla. All rights reserved.
  * @license     GNU General Public License version 3; see LICENSE
  */
 
