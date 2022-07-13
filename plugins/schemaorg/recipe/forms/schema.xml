@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fields name="schema">
+		<fieldset
+			name="schema"
+			label="Schema"
+		>
+			<field
+				name="field-name"
+				type="subform"
+				showon="schemaType:recipe"
+			>
+				<form>
+
+					<field
+						name="cookTime"
+						type="text"
+						filter="string"
+						size="30"
+						label="Cook Time"
+					/>
+
+					<field
+						name="cookingMethod"
+						type="text"
+						filter="string"
+						size="30"
+						label="Cooking Method"
+					/>
+
+					<field
+						name="ingredients"
+						type="text"
+						filter="string"
+						size="30"
+						label="Ingredients"
+					/>
+
+					<field
+						name="nutrition"
+						type="text"
+						filter="string"
+						size="30"
+						label="Nutrition"
+					/>
+
+					<field
+						name="prepTime"
+						type="text"
+						filter="string"
+						size="30"
+						label="Prepration Time"
+					/>
+
+				</form>
+			</field>
+		</fieldset>
+	</fields>
+</form>
