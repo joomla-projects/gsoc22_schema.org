@@ -11,6 +11,7 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Form\FormHelper;
 
 
 /**
@@ -59,6 +60,11 @@ class PlgSchemaorgRecipe extends CMSPlugin
 
 		$schemaType=$form->getGroup('schema');
 		$schemaType['jform_schema_schemaType']->addOption('Recipe', ['value' => 'recipe']);
+
+		//Load the form fields
+		FormHelper::addFormPath(__DIR__ . '/forms');
+		$form->loadFile('schema');
+
 	}
 
 }

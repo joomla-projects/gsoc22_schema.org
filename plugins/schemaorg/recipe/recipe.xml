@@ -11,6 +11,7 @@
 	<description>PLG_SCHEMAORG_RECIPE_XML_DESCRIPTION</description>
 	<files>
 		<filename plugin="recipe">recipe.php</filename>
+		<folder>forms</folder>
 	</files>
 	<languages>
 		<language tag="en-GB">language/en-GB/plg_schemaorg_recipe.ini</language>
