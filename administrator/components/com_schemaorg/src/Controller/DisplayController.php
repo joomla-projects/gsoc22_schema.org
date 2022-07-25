@@ -1,6 +1,6 @@
 <?php
 
-namespace Joomla\Component\Schemaorg\Administrator\Controller;
+namespace Joomla\Component\com_schemaorg\Administrator\Controller;
 
 defined('_JEXEC') or die;
 
@@ -26,7 +26,7 @@ class DisplayController extends BaseController {
      *
      * @var string
      */
-    protected $default_view = 'schemaorg';
+    protected $default_view = 'com_schemaorg';
     
     public function display($cachable = false, $urlparams = array()) {
         return parent::display($cachable, $urlparams);

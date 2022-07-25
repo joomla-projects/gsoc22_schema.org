@@ -6,7 +6,7 @@
 			label="Schema"
 		>
 			<field
-				name="field-name"
+				name="recipe-form"
 				type="subform"
 				showon="schemaType:recipe"
 			>
@@ -14,9 +14,7 @@
 
 					<field
 						name="cookTime"
-						type="text"
-						filter="string"
-						size="30"
+						type="time"
 						label="Cook Time"
 					/>
 
@@ -29,27 +27,148 @@
 					/>
 
 					<field
-						name="ingredients"
-						type="text"
-						filter="string"
-						size="30"
-						label="Ingredients"
-					/>
-
-					<field
-						name="nutrition"
-						type="text"
-						filter="string"
-						size="30"
-						label="Nutrition"
-					/>
-
-					<field
 						name="prepTime"
+						type="time"
+						label="Prepration Time"
+					/>
+
+					<field
+						name="recipeCategory"
 						type="text"
 						filter="string"
 						size="30"
-						label="Prepration Time"
+						label="Category"
+					/>
+
+					<field
+						name="recipeCuisine"
+						type="text"
+						filter="string"
+						size="30"
+						label="Cuisine"
+					/>
+
+					<field
+						name="recipeInstructions"
+						type="text"
+						filter="string"
+						size="30"
+						label="Instructions"
+					/>
+
+					<field
+						name="recipeYield"
+						type="text"
+						filter="string"
+						size="30"
+						label="Yield"
+					/>
+
+					<field
+						name="suitableForDiet"
+						type="text"
+						filter="string"
+						size="30"
+						label="Suitable For Diet"
+					/>
+
+					<field
+						name="ingredients"
+						type="subform"
+						label="Ingredients"
+						multiple="true"
+						min="1"
+					>
+						<form>
+							<field
+								name="ingredient"
+								type="text"
+								label="Ingredient"
+							/>
+						</form>
+					</field>
+
+					<field
+						name="calories"
+						type="number"
+						label="Calories"
+					/>
+
+					<field
+						name="carbohydrateContent"
+						type="number"
+						hint="grams"
+						label="Carbohydrate"
+					/>
+
+					<field
+						name="cholesterolContent"
+						type="number"
+						hint="grams"
+						label="Cholesterol"
+					/>
+
+					<field
+						name="fatContent"
+						type="number"
+						hint="grams"
+						label="Fat"
+					/>
+
+					<field
+						name="fiberContent"
+						type="number"
+						hint="grams"
+						label="Fiber"
+					/>
+
+					<field
+						name="proteinContent"
+						type="number"
+						hint="grams"
+						label="Protein"
+					/>
+
+					<field
+						name="saturatedFatContent"
+						type="number"
+						hint="grams"
+						label="Saturated Fat"
+					/>
+
+					<field
+						name="sodiumContent"
+						type="number"
+						hint="grams"
+						label="Sodium"
+					/>
+
+					<field
+						name="sugarContent"
+						type="number"
+						hint="grams"
+						label="Sugar"
+					/>
+
+					<field
+						name="transFatContent"
+						type="number"
+						hint="grams"
+						label="Trans Fat"
+					/>
+
+					<field
+						name="unsaturatedFatContent"
+						type="number"
+						hint="grams"
+						label="Unsaturated Fat"
+					/>
+
+					<field
+						name="servingSize"
+						type="number"
+						hint="grams"
+						label="Serving Size"
 					/>
 
 				</form>

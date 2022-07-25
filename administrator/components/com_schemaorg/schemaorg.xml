@@ -11,7 +11,7 @@
     <description>
         A Schema.org component
     </description>
-    <namespace path="src/">Joomla\Component\Schemaorg</namespace>
+    <namespace path="src/">Joomla\Component\com_schemaorg</namespace>
     <administration>
         <menu link="index.php?option=com_schemaorg">Schema.org</menu>
         <files folder="admin/">

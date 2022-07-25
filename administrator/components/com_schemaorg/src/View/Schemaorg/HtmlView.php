@@ -1,6 +1,6 @@
 <?php
 
-namespace Joomla\Component\Schemaorg\Administrator\View\Schemaorg;
+namespace Joomla\Component\com_schemaorg\Administrator\View\Schemaorg;
 
 defined('_JEXEC') or die;
 
@@ -20,7 +20,7 @@ use Joomla\CMS\MVC\View\HtmlView as BaseHtmlView;
 class HtmlView extends BaseHtmlView {
     
     /**
-     * Display the main "Hello World" view
+     * Display the main view
      *
      * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
      * @return  void

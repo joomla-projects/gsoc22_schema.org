@@ -10,6 +10,7 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplicationInterface;
+use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Form\FormHelper;
 
@@ -47,19 +48,19 @@ class PlgSchemaorgRecipe extends CMSPlugin
 		/**
 	 *  Add a new option to the schema type in the article editing page
 	 *
-	 *  @param   JForm  $form  The form to be altered.
+	 *  @param   Form  $form  The form to be altered.
 	 *
 	 *  @return  boolean
 	 */
-	public function onSchemaPrepareForm($form)
+	public function onSchemaPrepareForm(Form $form)
 	{
 		if ($form->getName() != 'com_content.article')
 		{
 			return;
 		}
 
-		$schemaType=$form->getGroup('schema');
-		$schemaType['jform_schema_schemaType']->addOption('Recipe', ['value' => 'recipe']);
+		$schemaType=$form->getField('schemaType','schema');
+		$schemaType->addOption('Recipe', ['value' => 'recipe']);
 
 		//Load the form fields
 		FormHelper::addFormPath(__DIR__ . '/forms');
