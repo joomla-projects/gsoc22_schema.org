@@ -2,8 +2,6 @@
 
 namespace Joomla\Component\com_schemaorg\Administrator\Controller;
 
-defined('_JEXEC') or die;
-
 use Joomla\CMS\MVC\Controller\BaseController;
 
 /**
@@ -20,16 +18,17 @@ use Joomla\CMS\MVC\Controller\BaseController;
  * @package     Joomla.Administrator
  * @subpackage  com_schemaorg
  */
-class DisplayController extends BaseController {
+class DisplayController extends BaseController
+{
     /**
      * The default view for the display method.
      *
      * @var string
      */
     protected $default_view = 'com_schemaorg';
-    
-    public function display($cachable = false, $urlparams = array()) {
+
+    public function display($cachable = false, $urlparams = array())
+    {
         return parent::display($cachable, $urlparams);
     }
-    
 }
