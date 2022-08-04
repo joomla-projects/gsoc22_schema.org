@@ -3,10 +3,10 @@
 	<fields name="schema">
 		<fieldset
 			name="schema"
-			label="Schema"
+			label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_LABEL"
 		>
 			<field
-				name="recipe-form"
+				name="recipeForm"
 				type="subform"
 				showon="schemaType:recipe"
 			>
@@ -14,8 +14,9 @@
 
 					<field
 						name="cookTime"
-						type="time"
-						label="Cook Time"
+						type="subform"
+						formsource="plugins\schemaorg\recipe\forms\duration.xml"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_COOK_TIME_LABEL"
 					/>
 
 					<field
@@ -23,13 +24,14 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Cooking Method"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_COOKING_MEHTOD_LABEL"
 					/>
 
 					<field
 						name="prepTime"
-						type="time"
-						label="Prepration Time"
+						type="subform"
+						formsource="plugins\schemaorg\recipe\forms\duration.xml"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_PREPARATION_TIME_LABEL"
 					/>
 
 					<field
@@ -37,7 +39,7 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Category"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_CATEGORY_LABEL"
 					/>
 
 					<field
@@ -45,7 +47,7 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Cuisine"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_CUISINE_LABEL"
 					/>
 
 					<field
@@ -53,7 +55,7 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Instructions"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_INSTRUCTIONS_LABEL"
 					/>
 
 					<field
@@ -61,7 +63,7 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Yield"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_YIELD_LABEL"
 					/>
 
 					<field
@@ -69,13 +71,13 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="Suitable For Diet"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_SUITABLE_FOR_DIET_LABEL"
 					/>
 
 					<field
 						name="ingredients"
 						type="subform"
-						label="Ingredients"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_INGREDIENTS_LABEL"
 						multiple="true"
 						min="1"
 					>
@@ -83,7 +85,7 @@
 							<field
 								name="ingredient"
 								type="text"
-								label="Ingredient"
+								hiddenLabel="true"
 							/>
 						</form>
 					</field>
@@ -91,84 +93,84 @@
 					<field
 						name="calories"
 						type="number"
-						label="Calories"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_CALORIES_LABEL"
 					/>
 
 					<field
 						name="carbohydrateContent"
 						type="number"
 						hint="grams"
-						label="Carbohydrate"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_CARBOHYDRATE_LABEL"
 					/>
 
 					<field
 						name="cholesterolContent"
 						type="number"
 						hint="grams"
-						label="Cholesterol"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_CHOLESTROL_CONTENT_LABEL"
 					/>
 
 					<field
 						name="fatContent"
 						type="number"
 						hint="grams"
-						label="Fat"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_FAT_LABEL"
 					/>
 
 					<field
 						name="fiberContent"
 						type="number"
 						hint="grams"
-						label="Fiber"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_FIBER_LABEL"
 					/>
 
 					<field
 						name="proteinContent"
 						type="number"
 						hint="grams"
-						label="Protein"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_PROTEIN_LABEL"
 					/>
 
 					<field
 						name="saturatedFatContent"
 						type="number"
 						hint="grams"
-						label="Saturated Fat"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_SATURATED_FAT_LABEL"
 					/>
 
 					<field
 						name="sodiumContent"
 						type="number"
 						hint="grams"
-						label="Sodium"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_SODIUM_LABEL"
 					/>
 
 					<field
 						name="sugarContent"
 						type="number"
 						hint="grams"
-						label="Sugar"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_SUGAR_LABEL"
 					/>
 
 					<field
 						name="transFatContent"
 						type="number"
 						hint="grams"
-						label="Trans Fat"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_TRANS_FAT_LABEL"
 					/>
 
 					<field
 						name="unsaturatedFatContent"
 						type="number"
 						hint="grams"
-						label="Unsaturated Fat"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_UNSATURATED_FAT_LABEL"
 					/>
 
 					<field
 						name="servingSize"
 						type="number"
 						hint="grams"
-						label="Serving Size"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_SERVING_SIZE_LABEL"
 					/>
 
 				</form>

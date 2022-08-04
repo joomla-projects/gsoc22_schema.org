@@ -3,7 +3,7 @@
 	<fields name="schema">
 		<fieldset
 			name="schema"
-			label="Schema"
+			label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_LABEL"
 		>
 			<field
 				name="articleId"
@@ -16,9 +16,9 @@
 			<field
 				name="schemaType"
 				type="list"
-				label="Schema Type"
+				label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_TYPE_LABEL"
 				>
-				<option>None</option>
+				<option>PLG_SYSTEM_SCHEMA_FIELD_NONE_LABEL</option>
 			</field>
 
 		</fieldset>
