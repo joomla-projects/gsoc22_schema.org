@@ -14,6 +14,7 @@ use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
 use Joomla\CMS\Form\FormHelper;
+use Joomla\CMS\Event\AbstractEvent;
 
 /**
  * Schemaorg Plugin
@@ -47,6 +48,18 @@ class PlgSchemaorgRecipe extends CMSPlugin
     protected $app;
 
     /**
+     *  Updates schema form
+     *
+     *  @param   Form  $form  The form to be altered.
+     *
+     *  @return  boolean
+     */
+    public function onSchemaPrepareData($data)
+    {
+        $this->updateSchemaForm($data);
+    }
+
+     /**
      *  Add a new option to the schema type in the article editing page
      *
      *  @param   Form  $form  The form to be altered.
@@ -64,5 +77,17 @@ class PlgSchemaorgRecipe extends CMSPlugin
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
+    }
+
+    /**
+     *  Add a new option to the schema type in the article editing page
+     *
+     *  @param   Form  $form  The form to be altered.
+     *
+     *  @return  boolean
+     */
+    public function onSchemaBeforeSave(AbstractEvent $event)
+    {
+        $this->saveSchema($event, 'recipeForm');
     }
 }

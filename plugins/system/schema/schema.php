@@ -89,6 +89,16 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
+        $event   = AbstractEvent::create(
+            'onSchemaPrepareData',
+            [
+                'subject' => $data,
+            ]
+        );
+
+        PluginHelper::importPlugin('schemaorg');
+        $this->app->getDispatcher()->dispatch('onSchemaPrepareData', $event);
+
         return true;
     }
 
@@ -146,6 +156,23 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         $article = $event->getArgument('1');
         $isNew = $event->getArgument('2');
         $data = $event->getArgument('3');
+
+        PluginHelper::importPlugin('schemaorg');
+        // $this->app->getDispatcher()->dispatch('onSchemaBeforeSave', $event);
+
+        $this->app->getDispatcher()->dispatch(
+            'onSchemaBeforeSave',
+            AbstractEvent::create(
+                'onSchemaBeforeSave',
+                [
+                    'subject'       => $this,
+                    'extension'     => $context,
+                    'article'       => $article,
+                    'isNew'         => $isNew,
+                    'data'          => $data,
+                ]
+            )
+        );
 
         return true;
     }

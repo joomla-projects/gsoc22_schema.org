@@ -6,7 +6,7 @@
 			label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_LABEL"
 		>
 			<field
-				name="articleId"
+				name="itemId"
 				type="hidden"
 				filter="string"
 				size="30"
