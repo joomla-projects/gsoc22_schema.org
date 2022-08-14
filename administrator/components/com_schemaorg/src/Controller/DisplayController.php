@@ -25,7 +25,7 @@ class DisplayController extends BaseController
      *
      * @var string
      */
-    protected $default_view = 'com_schemaorg';
+    protected $default_view = 'schemaorg';
 
     public function display($cachable = false, $urlparams = array())
     {
