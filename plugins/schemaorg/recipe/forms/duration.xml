@@ -6,7 +6,7 @@
     />
 
     <field
-        name="mins"
+        name="min"
         type="number"
         label="PLG_SCHEMAORG_RECIPE_FIELD_MINUTE_LABEL"
         max="59"

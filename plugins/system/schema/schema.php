@@ -16,6 +16,7 @@ use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Registry\Registry;
 
 /**
  * Schemaorg System Plugin
@@ -67,7 +68,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             'onBeforeCompileHead'                  => 'onBeforeCompileHead',
             'onContentPrepareData'            => 'onContentPrepareData',
             'onContentPrepareForm'            => 'onContentPrepareForm',
-            'onContentBeforeSave'            => 'onContentBeforeSave',
+            'onContentAfterSave'            => 'onContentAfterSave',
         ];
     }
 
@@ -89,16 +90,18 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
+        $registry = new Registry($data);
+
         $event   = AbstractEvent::create(
             'onSchemaPrepareData',
             [
-                'subject' => $data,
+                'subject' => $registry,
             ]
         );
 
         PluginHelper::importPlugin('schemaorg');
         $this->app->getDispatcher()->dispatch('onSchemaPrepareData', $event);
-
+        $data = $registry->toArray();
         return true;
     }
 
@@ -145,7 +148,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
      * @return  boolean
      *
      */
-    public function onContentBeforeSave(EventInterface $event)
+    public function onContentAfterSave(EventInterface $event)
     {
         $context = $event->getArgument('0');
 
@@ -153,23 +156,23 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        $article = $event->getArgument('1');
+        $table = $event->getArgument('1');
         $isNew = $event->getArgument('2');
         $data = $event->getArgument('3');
 
+        $registry = new Registry($data);
         PluginHelper::importPlugin('schemaorg');
-        // $this->app->getDispatcher()->dispatch('onSchemaBeforeSave', $event);
 
         $this->app->getDispatcher()->dispatch(
-            'onSchemaBeforeSave',
+            'onSchemaAfterSave',
             AbstractEvent::create(
-                'onSchemaBeforeSave',
+                'onSchemaAfterSave',
                 [
                     'subject'       => $this,
                     'extension'     => $context,
-                    'article'       => $article,
+                    'table'       => $table,
                     'isNew'         => $isNew,
-                    'data'          => $data,
+                    'data'          => $registry,
                 ]
             )
         );

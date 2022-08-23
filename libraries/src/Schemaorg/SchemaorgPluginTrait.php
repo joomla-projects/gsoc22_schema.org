@@ -9,9 +9,9 @@
 
 namespace Joomla\CMS\Schemaorg;
 
-use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Form\Form;
-
+use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Trait for component schemaorg plugins.
@@ -24,7 +24,8 @@ trait SchemaorgPluginTrait
      * Add a new option to schemaType list field in schema form
      *
      * @param   Form $form  Form to manipulate
-     * @param   $schemaType Schema Type to add
+     * @param   $type Schema Type to add
+     * @param   $value Value of the type
      *
      * @return  boolean
      *
@@ -39,19 +40,21 @@ trait SchemaorgPluginTrait
     /**
      * Saves unfiltered JSON data of the form fields in database
      *
-     * @param   Form $form  Form to manipulate
-     * @param   $schemaType Schema Type to add
+     * @param   $event  EventInterface
+     * @param   $form   Name of the form
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function saveSchema(AbstractEvent $event, $form)
+    protected function saveSchema($event, $form)
     {
         $context    = $event->getArgument('extension');
-        $article    = $event->getArgument('article');
+        $table    = $event->getArgument('table');
         $isNew    = $event->getArgument('isNew');
-        $data    = $event->getArgument('data');
+        $registry    = $event->getArgument('data');
+
+        $data = $registry->toArray();
 
         //Check if $data has the form data
         if (isset($data['schema']) && \count($data['schema'])) {
@@ -61,7 +64,7 @@ trait SchemaorgPluginTrait
             if (!$isNew) {
                 $res = $db->getQuery(true)
                 ->delete($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $article->id);
+                ->where('itemId = ' . $table->id);
                 $db->setQuery($res)->execute();
             }
 
@@ -77,6 +80,7 @@ trait SchemaorgPluginTrait
             }
 
             $query->schemaForm = json_encode($schema);
+            $query->schema = json_encode($this->cleanupSchema($schema));
             $result = $db->insertObject('#__schemaorg', $query);
         }
     }
@@ -84,14 +88,13 @@ trait SchemaorgPluginTrait
     /**
      * updates schema form
      *
-     * @param   Form $form  Form to manipulate
-     * @param   $schemaType Schema Type to add
+     * @param   $data
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function updateSchemaForm($data)
+    protected function updateSchemaForm(Registry $data)
     {
         if (\is_object($data)) {
             $itemId = $data->id ?? 0;
@@ -124,5 +127,98 @@ trait SchemaorgPluginTrait
                 $data->schema['itemId'] = $itemId;
             }
         }
+    }
+
+    /**
+     * Removes empty field and changes time duration to ISO format in schema form
+     *
+     * @param   $data JSON object of the data stored in schema form
+     *
+     * @return  object
+     *
+     * @since   4.0.0
+     */
+    protected function cleanupSchema($data)
+    {
+        if (\is_object($data)) {
+            //Create object to insert data into database
+            $schema = new \stdClass();
+            foreach ($data as $k => $v) {
+                    $emp = true;
+                foreach ($v as $i => $j) {
+                    $emp = false;
+                    $em = true;
+                    foreach ($j as $y => $z) {
+                        $em = false;
+                        if (!empty($z)) {
+                            $em = true;
+                            break;
+                        }
+                    }
+                    if (!empty($j) && $em) {
+                        $emp = true;
+                        break;
+                    }
+                }
+
+                if (!empty($v) && $emp) {
+                    $schema->$k = $v;
+                }
+            }
+
+            $registrySchema = new Registry($schema);
+            $newSchema = $this->cleanupIndividualSchema($registrySchema);
+            return $newSchema;
+        }
+
+        return false;
+    }
+
+
+    /**
+     *  To add plugin specific functions
+     *
+     *  @param   Registry $schema Schema form
+     *
+     *  @return  boolean
+     */
+    protected function cleanupIndividualSchema(Registry $schema)
+    {
+
+        return true;
+    }
+
+    /**
+     *  To change hour and mins to duration ISO format
+     *
+     *  @param   Registry $schema Schema form
+     *  @param   Array $durationKeys Keys with duration fields
+     *
+     *  @return  boolean
+     */
+    protected function changeDurationFormat(Registry $schema, $durationKeys)
+    {
+        foreach ($durationKeys as $durationKey) {
+            $duration = $schema->get($durationKey, []);
+            if (is_object($duration)) {
+                $registry = new Registry($duration);
+                $min = $registry->get('min');
+                $hour = $registry->get('hour');
+
+                if ($hour && $min && $min < 60) {
+                    $newDuration = "PT" . $hour . "H" . $min . "M";
+                } elseif ($hour) {
+                    $newDuration = "PT" . $hour . "H";
+                } elseif ($min < 60) {
+                    $newDuration = "PT" . $min . "M";
+                } else {
+                    return;
+                }
+                $schema->set($durationKey, $newDuration);
+            }
+        }
+            $schema->toArray();
+
+            return $schema;
     }
 }

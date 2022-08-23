@@ -15,6 +15,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
+use Joomla\Registry\Registry;
 
 /**
  * Schemaorg Plugin
@@ -48,9 +49,9 @@ class PlgSchemaorgRecipe extends CMSPlugin
     protected $app;
 
     /**
-     *  Updates schema form
+     *  Update existing schema form with data from database
      *
-     *  @param   Form  $form  The form to be altered.
+     *  @param   $data  The form to be altered.
      *
      *  @return  boolean
      */
@@ -80,14 +81,27 @@ class PlgSchemaorgRecipe extends CMSPlugin
     }
 
     /**
-     *  Add a new option to the schema type in the article editing page
+     *  Saves the schema to the database
      *
-     *  @param   Form  $form  The form to be altered.
+     *  @param   AbstractEvent $event
      *
      *  @return  boolean
      */
-    public function onSchemaBeforeSave(AbstractEvent $event)
+    public function onSchemaAfterSave(AbstractEvent $event)
     {
         $this->saveSchema($event, 'recipeForm');
+    }
+
+    /**
+     *  To add plugin specific functions
+     *
+     *  @param   Registry $schema Schema form
+     *
+     *  @return  boolean
+     */
+    public function cleanupIndividualSchema(Registry $schema)
+    {
+        $schema = $this->changeDurationFormat($schema, ['cookTime', 'prepTime']);
+        return $schema;
     }
 }
