@@ -17,8 +17,9 @@
 				name="schemaType"
 				type="list"
 				label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_TYPE_LABEL"
+				default="None"
 				>
-				<option>PLG_SYSTEM_SCHEMA_FIELD_NONE_LABEL</option>
+				<option value="None">PLG_SYSTEM_SCHEMA_FIELD_NONE_LABEL</option>
 			</field>
 
 		</fieldset>

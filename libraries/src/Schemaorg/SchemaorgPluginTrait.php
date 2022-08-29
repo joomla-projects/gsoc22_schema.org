@@ -12,6 +12,9 @@ namespace Joomla\CMS\Schemaorg;
 use Joomla\CMS\Form\Form;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
+use RecursiveArrayIterator;
+use RecursiveIteratorIterator;
+use stdClass;
 
 /**
  * Trait for component schemaorg plugins.
@@ -31,14 +34,14 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function addSchemaType(Form $form, $type, $value)
+    protected function addSchemaType(Form $form, $type)
     {
         $schemaType = $form->getField('schemaType', 'schema');
-        $schemaType->addOption($type, ['value' => $value]);
+        $schemaType->addOption($type, ['value' => $type]);
     }
 
     /**
-     * Saves unfiltered JSON data of the form fields in database
+     * Saves unfiltered and filtered JSON data of the form fields in database
      *
      * @param   $event  EventInterface
      * @param   $form   Name of the form
@@ -47,7 +50,7 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function saveSchema($event, $form)
+    protected function saveSchema($event)
     {
         $context    = $event->getArgument('extension');
         $table    = $event->getArgument('table');
@@ -70,17 +73,25 @@ trait SchemaorgPluginTrait
 
             //Create object to insert data into database
             $query = new \stdClass();
-            $query->itemId = $data['schema']['itemId'];
+            $query->itemId = $table->id;
             $query->context = $context;
             $query->schemaType = $data['schema']['schemaType'];
+            $form = $data['schema']['schemaType'];
 
-            $schema = new \stdClass();
-            foreach ($data['schema'][$form] as $k => $v) {
-                $schema->$k = $v;
+            if (!empty($data['schema'][$form])) {
+                $schema = new \stdClass();
+
+                foreach ($data['schema'][$form] as $k => $v) {
+                    $schema->$k = $v;
+                }
+
+                $query->schemaForm = json_encode($schema);
+                $newSchema = new Registry($schema);
+                $query->schema = json_encode($this->cleanupSchema($newSchema));
+            } else {
+                $query->schemaForm = false;
+                $query->schema = false;
             }
-
-            $query->schemaForm = json_encode($schema);
-            $query->schema = json_encode($this->cleanupSchema($schema));
             $result = $db->insertObject('#__schemaorg', $query);
         }
     }
@@ -94,7 +105,7 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function updateSchemaForm(Registry $data)
+    protected function updateSchemaForm($data)
     {
         if (\is_object($data)) {
             $itemId = $data->id ?? 0;
@@ -104,26 +115,41 @@ trait SchemaorgPluginTrait
                 // Load the table data from the database
                 $db = $this->db;
                 $query = $db->getQuery(true)
-                    ->select('*')
-                    ->from($db->quoteName('#__schemaorg'))
-                    ->where('itemId = ' . $itemId);
+                ->select('*')
+                ->from($db->quoteName('#__schemaorg'))
+                ->where('itemId = ' . $itemId);
                 $db->setQuery($query);
                 $results = $db->loadAssoc();
 
-                // Insert existing data into form fields
+                $schemaType = $results['schemaType'];
                 $data->schema = [];
-                if (\is_array($results) || \is_object($results)) {
-                    foreach ($results as $k => $v) {
-                        $data->schema[$k] = $v;
+                $data->schema['schemaType'] = $schemaType;
+
+                $form = $results['schemaForm'];
+
+                if ($form) {
+                    $data->schema[$schemaType]['cookTime']['min'] = '101';
+                    $formIterator = new RecursiveIteratorIterator(
+                        new RecursiveArrayIterator(json_decode($form, true)),
+                        RecursiveIteratorIterator::SELF_FIRST
+                    );
+
+                    // Insert existing data into form fields
+                    foreach ($formIterator as $key => $val) {
+                        if (is_array($val)) {
+                            foreach ($val as $i => $j) {
+                                $data->schema[$schemaType][$key][$i] = $j;
+                            }
+                        } else {
+                                $data->schema[$schemaType][$key] = $val;
+                        }
                     }
                 } else {
                //Insert article id as it is a hidden field
-                    $data->schema = [];
                     $data->schema['itemId'] = $itemId;
                 }
             } else {
                 //Insert article id as it is a hidden field
-                $data->schema = [];
                 $data->schema['itemId'] = $itemId;
             }
         }
@@ -142,36 +168,34 @@ trait SchemaorgPluginTrait
     {
         if (\is_object($data)) {
             //Create object to insert data into database
-            $schema = new \stdClass();
-            foreach ($data as $k => $v) {
-                    $emp = true;
-                foreach ($v as $i => $j) {
-                    $emp = false;
-                    $em = true;
-                    foreach ($j as $y => $z) {
-                        $em = false;
-                        if (!empty($z)) {
-                            $em = true;
-                            break;
-                        }
-                    }
-                    if (!empty($j) && $em) {
-                        $emp = true;
-                        break;
-                    }
-                }
+            $newSchema = new Registry();
+            $newSchema->set('@context', 'https://schema.org');
 
-                if (!empty($v) && $emp) {
-                    $schema->$k = $v;
+            $schema = new Registry($this->cleanupIndividualSchema($data));
+            if (\is_object($schema)) {
+                foreach ($schema as $key => $val) {
+                    if (is_array($val) && !empty($val['@type'])) {
+                        $arr = new stdClass();
+                        $emty = true;
+                        foreach ($val as $k => $v) {
+                            if ($v != '') {
+                                $arr->$k = $v;
+                                if ($k != '@type') {
+                                    $emty = false;
+                                }
+                            }
+                        }
+                        if (!$emty) {
+                            $newSchema->set($key, $arr);
+                        }
+                    } elseif (!empty($val)) {
+                        $newSchema->set($key, $val);
+                    }
                 }
             }
 
-            $registrySchema = new Registry($schema);
-            $newSchema = $this->cleanupIndividualSchema($registrySchema);
             return $newSchema;
         }
-
-        return false;
     }
 
 
@@ -184,8 +208,6 @@ trait SchemaorgPluginTrait
      */
     protected function cleanupIndividualSchema(Registry $schema)
     {
-
-        return true;
     }
 
     /**
@@ -209,16 +231,55 @@ trait SchemaorgPluginTrait
                     $newDuration = "PT" . $hour . "H" . $min . "M";
                 } elseif ($hour) {
                     $newDuration = "PT" . $hour . "H";
-                } elseif ($min < 60) {
+                } elseif ($min && $min < 60) {
                     $newDuration = "PT" . $min . "M";
                 } else {
-                    return;
+                    $newDuration = false ;
                 }
-                $schema->set($durationKey, $newDuration);
+
+                if ($newDuration) {
+                    $schema->set($durationKey, $newDuration);
+                } else {
+                    $schema->remove($durationKey);
+                }
             }
         }
-            $schema->toArray();
+        $schema->toArray();
+        return $schema;
+    }
 
-            return $schema;
+    /**
+     *  To create an array from repeatable text field data
+     *
+     *  @param   Registry $schema Schema form
+     *  @param   Array $durationKeys Keys with duration fields
+     *
+     *  @return  array
+     */
+    protected function convertToArray(Registry $schema, $repeatableFields)
+    {
+        foreach ($repeatableFields as $repeatableField) {
+            $field = new Registry($schema->get($repeatableField, []));
+            $arr = array();
+            if (is_object($field)) {
+                foreach ($field as $i => $j) {
+                    if (is_object($j)) {
+                        foreach ($j as $k => $m) {
+                            if (!empty($m)) {
+                                array_push($arr, $m);
+                            }
+                        }
+                    } else {
+                        array_push($arr, $j);
+                    }
+                }
+                if (!empty($arr)) {
+                    $schema->set($repeatableField, $arr);
+                } else {
+                    $schema->remove($repeatableField);
+                }
+            }
+        }
+        return $schema;
     }
 }

@@ -6,17 +6,54 @@
 			label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_LABEL"
 		>
 			<field
-				name="recipeForm"
+				name="Recipe"
 				type="subform"
-				showon="schemaType:recipe"
+				showon="schemaType:Recipe"
 			>
 				<form>
+					
+					<field
+						name="@type"
+						type="hidden"
+						default="Recipe"
+					/>
+
+					<field 
+						name="image"
+						type="media"
+					/>
+
+					<field
+						name="author"
+						type="text"
+						filter="string"
+						size="30"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_AUTHOR_LABEL"
+					/>
 
 					<field
 						name="cookTime"
 						type="subform"
 						formsource="plugins\schemaorg\recipe\forms\duration.xml"
 						label="PLG_SCHEMAORG_RECIPE_FIELD_COOK_TIME_LABEL"
+					/>
+
+					<field
+						name="datePublished"
+						type="calendar"
+						label="Date Published"
+						class="input-small"
+						filter="user_utc"
+						showtime="false" 
+						todaybutton="true"
+						format="%Y-%m-%d"
+					/>
+
+					<field
+						name="description"
+						type="text"
+						filter="string"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_DESCRIPTION_LABEL"
 					/>
 
 					<field
@@ -75,7 +112,7 @@
 					/>
 
 					<field
-						name="ingredients"
+						name="recipeIngredient"
 						type="subform"
 						label="PLG_SCHEMAORG_RECIPE_FIELD_INGREDIENTS_LABEL"
 						multiple="true"
@@ -91,87 +128,102 @@
 					</field>
 
 					<field
-						name="calories"
-						type="number"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_CALORIES_LABEL"
-					/>
+						name="nutrition"
+						type="subform"
+						label="Nutrition"
+					>
+					
+						<form>
+							<field
+								name="@type"
+								type="hidden"
+								default="NutritionInformation"
+							/>
 
-					<field
-						name="carbohydrateContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_CARBOHYDRATE_LABEL"
-					/>
+							<field
+								name="calories"
+								type="number"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_CALORIES_LABEL"
+							/>
 
-					<field
-						name="cholesterolContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_CHOLESTROL_CONTENT_LABEL"
-					/>
+							<field
+								name="carbohydrateContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_CARBOHYDRATE_LABEL"
+							/>
 
-					<field
-						name="fatContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_FAT_LABEL"
-					/>
+							<field
+								name="cholesterolContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_CHOLESTROL_CONTENT_LABEL"
+							/>
 
-					<field
-						name="fiberContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_FIBER_LABEL"
-					/>
+							<field
+								name="fatContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_FAT_LABEL"
+							/>
 
-					<field
-						name="proteinContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_PROTEIN_LABEL"
-					/>
+							<field
+								name="fiberContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_FIBER_LABEL"
+							/>
 
-					<field
-						name="saturatedFatContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_SATURATED_FAT_LABEL"
-					/>
+							<field
+								name="proteinContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_PROTEIN_LABEL"
+							/>
 
-					<field
-						name="sodiumContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_SODIUM_LABEL"
-					/>
+							<field
+								name="saturatedFatContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_SATURATED_FAT_LABEL"
+							/>
 
-					<field
-						name="sugarContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_SUGAR_LABEL"
-					/>
+							<field
+								name="sodiumContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_SODIUM_LABEL"
+							/>
 
-					<field
-						name="transFatContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_TRANS_FAT_LABEL"
-					/>
+							<field
+								name="sugarContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_SUGAR_LABEL"
+							/>
 
-					<field
-						name="unsaturatedFatContent"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_UNSATURATED_FAT_LABEL"
-					/>
+							<field
+								name="transFatContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_TRANS_FAT_LABEL"
+							/>
 
-					<field
-						name="servingSize"
-						type="number"
-						hint="grams"
-						label="PLG_SCHEMAORG_RECIPE_FIELD_SERVING_SIZE_LABEL"
-					/>
+							<field
+								name="unsaturatedFatContent"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_UNSATURATED_FAT_LABEL"
+							/>
+
+							<field
+								name="servingSize"
+								type="number"
+								hint="grams"
+								label="PLG_SCHEMAORG_RECIPE_FIELD_SERVING_SIZE_LABEL"
+							/>
+						</form>
+					</field>
 
 				</form>
 			</field>

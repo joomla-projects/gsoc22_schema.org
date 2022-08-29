@@ -90,18 +90,18 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        $registry = new Registry($data);
+        //$registry = new Registry($data);
 
         $event   = AbstractEvent::create(
             'onSchemaPrepareData',
             [
-                'subject' => $registry,
+                'subject' => $data,
             ]
         );
 
         PluginHelper::importPlugin('schemaorg');
         $this->app->getDispatcher()->dispatch('onSchemaPrepareData', $event);
-        $data = $registry->toArray();
+        $data = $event->getArgument('subject');
         return true;
     }
 
