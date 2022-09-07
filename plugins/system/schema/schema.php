@@ -192,5 +192,17 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         if (!$this->app->isClient('Site') && $context === 'com_content.article') {
             return;
         }
+
+        PluginHelper::importPlugin('schemaorg');
+
+        $this->app->getDispatcher()->dispatch(
+            'onSchemaBeforeCompileHead',
+            AbstractEvent::create(
+                'onSchemaBeforeCompileHead',
+                [
+                    'subject'       => $this
+                ]
+            )
+        );
     }
 }

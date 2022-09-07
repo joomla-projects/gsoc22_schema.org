@@ -10,6 +10,7 @@
 namespace Joomla\CMS\Schemaorg;
 
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 use RecursiveArrayIterator;
@@ -60,7 +61,7 @@ trait SchemaorgPluginTrait
         $data = $registry->toArray();
 
         //Check if $data has the form data
-        if (isset($data['schema']) && \count($data['schema'])) {
+        if (isset($data['schema']) && count($data['schema'])) {
             $db = $this->db;
 
             //Delete the existing row to add updated data
@@ -107,7 +108,7 @@ trait SchemaorgPluginTrait
      */
     protected function updateSchemaForm($data)
     {
-        if (\is_object($data)) {
+        if (is_object($data)) {
             $itemId = $data->id ?? 0;
 
             //Check if the form already has some data
@@ -125,20 +126,19 @@ trait SchemaorgPluginTrait
                 $data->schema = [];
                 $data->schema['schemaType'] = $schemaType;
 
-                $form = $results['schemaForm'];
-
+                $form = json_decode($results['schemaForm'], true);
                 if ($form) {
-                    $data->schema[$schemaType]['cookTime']['min'] = '101';
-                    $formIterator = new RecursiveIteratorIterator(
-                        new RecursiveArrayIterator(json_decode($form, true)),
-                        RecursiveIteratorIterator::SELF_FIRST
-                    );
-
                     // Insert existing data into form fields
-                    foreach ($formIterator as $key => $val) {
+                    foreach ($form as $key => $val) {
                         if (is_array($val)) {
                             foreach ($val as $i => $j) {
-                                $data->schema[$schemaType][$key][$i] = $j;
+                                if (is_array($j)) {
+                                    foreach ($j as $l => $m) {
+                                        $data->schema[$schemaType][$key][$i][$l] = $m;
+                                    }
+                                } else {
+                                    $data->schema[$schemaType][$key][$i] = $j;
+                                }
                             }
                         } else {
                                 $data->schema[$schemaType][$key] = $val;
@@ -166,38 +166,64 @@ trait SchemaorgPluginTrait
      */
     protected function cleanupSchema($data)
     {
-        if (\is_object($data)) {
+        if (is_object($data)) {
             //Create object to insert data into database
             $newSchema = new Registry();
             $newSchema->set('@context', 'https://schema.org');
 
             $schema = new Registry($this->cleanupIndividualSchema($data));
-            if (\is_object($schema)) {
+            if (is_object($schema)) {
                 foreach ($schema as $key => $val) {
                     if (is_array($val) && !empty($val['@type'])) {
-                        $arr = new stdClass();
-                        $emty = true;
-                        foreach ($val as $k => $v) {
-                            if ($v != '') {
-                                $arr->$k = $v;
-                                if ($k != '@type') {
-                                    $emty = false;
-                                }
-                            }
-                        }
-                        if (!$emty) {
-                            $newSchema->set($key, $arr);
+                        $tmp = $this->cleanupJSON($val);
+                        if (!empty($tmp)) {
+                            $newSchema->set($key, $tmp);
                         }
                     } elseif (!empty($val)) {
                         $newSchema->set($key, $val);
                     }
                 }
             }
+            $image = $schema->get('image');
+            if (!empty($image)) {
+                $img = HTMLHelper::_('cleanImageURL', $image);
+                $newSchema->set('image', $img->url);
+            }
 
             return $newSchema;
         }
     }
 
+        /**
+     * Push the schema to the head tag in the frontend
+     *
+     * @param   $schema JSON Schema
+     *
+     * @return  boolean
+     *
+     * @since   4.0.0
+     */
+    protected function pushSchema()
+    {
+        $itemId = $this->app->getInput()->getInt('id');
+
+        if ($itemId > 0) {
+            // Load the table data from the database
+            $db = $this->db;
+            $query = $db->getQuery(true)
+            ->select('*')
+            ->from($db->quoteName('#__schemaorg'))
+            ->where('itemId = ' . $itemId);
+            $db->setQuery($query);
+            $results = $db->loadAssoc();
+            $schema = $results['schema'];
+
+            if (!empty($schema)) {
+                $wa = $this->app->getDocument()->getWebAssetManager();
+                $wa->addInlineScript($schema, ['position' => 'after'], ['type' => 'application/ld+json']);
+            }
+        }
+    }
 
     /**
      *  To add plugin specific functions
@@ -245,6 +271,7 @@ trait SchemaorgPluginTrait
             }
         }
         $schema->toArray();
+
         return $schema;
     }
 
@@ -280,6 +307,31 @@ trait SchemaorgPluginTrait
                 }
             }
         }
+
         return $schema;
+    }
+
+    /**
+     *  To cleanup the JSON with @type attribute
+     *
+     *  @param   Array $schema
+     *
+     *  @return  object
+     */
+    protected function cleanupJSON($schema)
+    {
+        $arr = array();
+        $emty = true;
+        foreach ($schema as $k => $v) {
+            if ($v != '') {
+                $arr[$k] = $v;
+                if ($k != '@type') {
+                    $emty = false;
+                }
+            }
+        }
+        if (!$emty) {
+            return $arr;
+        }
     }
 }

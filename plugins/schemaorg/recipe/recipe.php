@@ -96,6 +96,20 @@ class PlgSchemaorgRecipe extends CMSPlugin
     }
 
     /**
+     *  Fetches schema and pushes to the head tag in the frontend
+     *
+     *  @param   AbstractEvent $event
+     *
+     *  @return  boolean
+     */
+    public function onSchemaBeforeCompileHead()
+    {
+        $this->pushSchema();
+    }
+
+    
+
+    /**
      *  To add plugin specific functions
      *
      *  @param   Registry $schema Schema form
