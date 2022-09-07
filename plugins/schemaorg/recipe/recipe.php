@@ -107,7 +107,7 @@ class PlgSchemaorgRecipe extends CMSPlugin
         $this->pushSchema();
     }
 
-    
+
 
     /**
      *  To add plugin specific functions
