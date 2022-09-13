@@ -101,7 +101,6 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 
         PluginHelper::importPlugin('schemaorg');
         $this->app->getDispatcher()->dispatch('onSchemaPrepareData', $event);
-        $data = $event->getArgument('subject');
         return true;
     }
 

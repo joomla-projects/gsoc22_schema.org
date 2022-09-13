@@ -57,9 +57,7 @@ class PlgSchemaorgRecipe extends CMSPlugin
      */
     public function onSchemaPrepareData(AbstractEvent $event)
     {
-        $data = $event->getArgument('subject');
-        $da = $this->updateSchemaForm($data);
-        $event->setArgument('subject', $data);
+        $this->updateSchemaForm($event);
         return true;
     }
 
@@ -92,7 +90,7 @@ class PlgSchemaorgRecipe extends CMSPlugin
      */
     public function onSchemaAfterSave(AbstractEvent $event)
     {
-        $this->saveSchema($event);
+        $this->storeSchemaToStandardLocation($event);
     }
 
     /**
@@ -119,7 +117,7 @@ class PlgSchemaorgRecipe extends CMSPlugin
     public function cleanupIndividualSchema(Registry $schema)
     {
         if (is_object($schema)) {
-            $schema = $this->changeDurationFormat($schema, ['cookTime', 'prepTime']);
+            $schema = $this->normalizeDurationsToISO($schema, ['cookTime', 'prepTime']);
         }
         if (is_object($schema)) {
             $schema = $this->convertToArray($schema, ['recipeIngredient']);

@@ -9,13 +9,11 @@
 
 namespace Joomla\CMS\Schemaorg;
 
+use Joomla\CMS\Event\GenericEvent;
+use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
-use RecursiveArrayIterator;
-use RecursiveIteratorIterator;
-use stdClass;
 
 /**
  * Trait for component schemaorg plugins.
@@ -28,30 +26,32 @@ trait SchemaorgPluginTrait
      * Add a new option to schemaType list field in schema form
      *
      * @param   Form $form  Form to manipulate
-     * @param   $type Schema Type to add
-     * @param   $value Value of the type
+     * @param   String $name Name of the schema type eg: "Recipe", "Blog" etc
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function addSchemaType(Form $form, $type)
+    protected function addSchemaType(Form $form, string $name)
     {
+        if (!$form || !$name) {
+            return false;
+        }
         $schemaType = $form->getField('schemaType', 'schema');
-        $schemaType->addOption($type, ['value' => $type]);
+        $schemaType->addOption($name, ['value' => $name]);
+        return true;
     }
 
     /**
      * Saves unfiltered and filtered JSON data of the form fields in database
      *
-     * @param   $event  EventInterface
-     * @param   $form   Name of the form
+     * @param   AbstractEvent $event Must have 'extension, 'table', 'isNew' and 'data'
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function saveSchema($event)
+    protected function storeSchemaToStandardLocation(GenericEvent $event)
     {
         $context    = $event->getArgument('extension');
         $table    = $event->getArgument('table');
@@ -61,7 +61,9 @@ trait SchemaorgPluginTrait
         $data = $registry->toArray();
 
         //Check if $data has the form data
-        if (isset($data['schema']) && count($data['schema'])) {
+        if (!isset($data['schema']) || !count($data['schema'])) {
+            return false;
+        } else {
             $db = $this->db;
 
             //Delete the existing row to add updated data
@@ -95,10 +97,11 @@ trait SchemaorgPluginTrait
             }
             $result = $db->insertObject('#__schemaorg', $query);
         }
+        return true;
     }
 
     /**
-     * updates schema form
+     * Add data to form fields from existing data in the database
      *
      * @param   $data
      *
@@ -106,9 +109,12 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function updateSchemaForm($data)
+    protected function updateSchemaForm(GenericEvent $event)
     {
-        if (is_object($data)) {
+        $data = $event->getArgument('subject');
+        if (!is_object($data)) {
+            return false;
+        } else {
             $itemId = $data->id ?? 0;
 
             //Check if the form already has some data
@@ -153,6 +159,8 @@ trait SchemaorgPluginTrait
                 $data->schema['itemId'] = $itemId;
             }
         }
+        $event->setArgument('subject', $data);
+        return true;
     }
 
     /**
@@ -216,6 +224,10 @@ trait SchemaorgPluginTrait
             ->where('itemId = ' . $itemId);
             $db->setQuery($query);
             $results = $db->loadAssoc();
+
+            if (!$results) {
+                return;
+            }
             $schema = $results['schema'];
 
             if (!empty($schema)) {
@@ -234,6 +246,7 @@ trait SchemaorgPluginTrait
      */
     protected function cleanupIndividualSchema(Registry $schema)
     {
+        //Write your code for extra filteration
     }
 
     /**
@@ -244,7 +257,7 @@ trait SchemaorgPluginTrait
      *
      *  @return  boolean
      */
-    protected function changeDurationFormat(Registry $schema, $durationKeys)
+    protected function normalizeDurationsToISO(Registry $schema, array $durationKeys)
     {
         foreach ($durationKeys as $durationKey) {
             $duration = $schema->get($durationKey, []);
@@ -270,7 +283,6 @@ trait SchemaorgPluginTrait
                 }
             }
         }
-        $schema->toArray();
 
         return $schema;
     }
@@ -279,11 +291,11 @@ trait SchemaorgPluginTrait
      *  To create an array from repeatable text field data
      *
      *  @param   Registry $schema Schema form
-     *  @param   Array $durationKeys Keys with duration fields
+     *  @param   Array $repeatableFields Names of all the Repeatable fields
      *
      *  @return  array
      */
-    protected function convertToArray(Registry $schema, $repeatableFields)
+    protected function convertToArray(Registry $schema, array $repeatableFields)
     {
         foreach ($repeatableFields as $repeatableField) {
             $field = new Registry($schema->get($repeatableField, []));
@@ -312,13 +324,13 @@ trait SchemaorgPluginTrait
     }
 
     /**
-     *  To cleanup the JSON with @type attribute
+     *  To cleanup sub-JSON with @type attribute eg: NutritionInformation
      *
      *  @param   Array $schema
      *
      *  @return  object
      */
-    protected function cleanupJSON($schema)
+    protected function cleanupJSON(array $schema)
     {
         $arr = array();
         $emty = true;
