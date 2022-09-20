@@ -14,6 +14,14 @@
 			/>
 
 			<field
+				name="schema"
+				type="textarea"
+				label="PLG_SYSTEM_SCHEMA_FIELD_PREVIEW_LABEL"
+				readonly="true"
+				rows="5"
+			/>
+
+			<field
 				name="schemaType"
 				type="list"
 				label="PLG_SYSTEM_SCHEMA_FIELD_SCHEMA_TYPE_LABEL"

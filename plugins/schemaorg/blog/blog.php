@@ -22,7 +22,7 @@ use Joomla\Registry\Registry;
  *
  * @since  4.0.0
  */
-class PlgSchemaorgRecipe extends CMSPlugin
+class PlgSchemaorgBlog extends CMSPlugin
 {
     use SchemaorgPluginTrait;
 
@@ -74,7 +74,7 @@ class PlgSchemaorgRecipe extends CMSPlugin
             return;
         }
 
-        $this->addSchemaType($form, 'Recipe');
+        $this->addSchemaType($form, 'BlogPosting');
 
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
@@ -105,8 +105,6 @@ class PlgSchemaorgRecipe extends CMSPlugin
         $this->pushSchema();
     }
 
-
-
     /**
      *  To add plugin specific functions
      *
@@ -116,6 +114,9 @@ class PlgSchemaorgRecipe extends CMSPlugin
      */
     public function cleanupIndividualSchema(Registry $schema)
     {
+        if (is_object($schema)) {
+            $schema = $this->cleanupDate($schema, ['datePublished', 'dateModified']);
+        }
         if (is_object($schema)) {
             $schema = $this->normalizeDurationsToISO($schema, ['cookTime', 'prepTime']);
         }

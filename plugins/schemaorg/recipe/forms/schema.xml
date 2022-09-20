@@ -21,6 +21,7 @@
 					<field 
 						name="image"
 						type="media"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_IMAGE_LABEL"
 					/>
 
 					<field
@@ -49,7 +50,7 @@
 					<field
 						name="datePublished"
 						type="calendar"
-						label="Date Published"
+						label="PLG_SCHEMAORG_RECIPE_FIELD_DATE_PUBLISHED_LABEL"
 						class="input-small"
 						filter="user_utc"
 						showtime="false" 

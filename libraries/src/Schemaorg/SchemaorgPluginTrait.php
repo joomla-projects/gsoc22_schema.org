@@ -11,6 +11,7 @@ namespace Joomla\CMS\Schemaorg;
 
 use Joomla\CMS\Event\GenericEvent;
 use Joomla\CMS\Event\Table\AbstractEvent;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Registry\Registry;
@@ -128,8 +129,12 @@ trait SchemaorgPluginTrait
                 $db->setQuery($query);
                 $results = $db->loadAssoc();
 
+                if (empty($results)) {
+                    return false;
+                }
                 $schemaType = $results['schemaType'];
                 $data->schema = [];
+                $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
                 $data->schema['schemaType'] = $schemaType;
 
                 $form = json_decode($results['schemaForm'], true);
@@ -202,7 +207,7 @@ trait SchemaorgPluginTrait
         }
     }
 
-        /**
+    /**
      * Push the schema to the head tag in the frontend
      *
      * @param   $schema JSON Schema
@@ -238,19 +243,7 @@ trait SchemaorgPluginTrait
     }
 
     /**
-     *  To add plugin specific functions
-     *
-     *  @param   Registry $schema Schema form
-     *
-     *  @return  boolean
-     */
-    protected function cleanupIndividualSchema(Registry $schema)
-    {
-        //Write your code for extra filteration
-    }
-
-    /**
-     *  To change hour and mins to duration ISO format
+     *  To normalize duration to ISO format
      *
      *  @param   Registry $schema Schema form
      *  @param   Array $durationKeys Keys with duration fields
@@ -324,6 +317,26 @@ trait SchemaorgPluginTrait
     }
 
     /**
+     *  To clean up the date fields in
+     *
+     *  @param   Registry $schema Schema form
+     *  @param   Array $dateKeys Keys with date fields
+     *
+     *  @return  boolean
+     */
+    protected function cleanupDate(Registry $schema, array $dateKeys)
+    {
+        foreach ($dateKeys as $dateKey) {
+            $date = $schema->get($dateKey);
+            if (!empty($date)) {
+                $date = Factory::getDate($date)->format('Y-m-d');
+                $schema->set($dateKey, $date);
+            }
+        }
+        return $schema;
+    }
+
+    /**
      *  To cleanup sub-JSON with @type attribute eg: NutritionInformation
      *
      *  @param   Array $schema
@@ -335,15 +348,37 @@ trait SchemaorgPluginTrait
         $arr = array();
         $emty = true;
         foreach ($schema as $k => $v) {
-            if ($v != '') {
+            if (is_array($v) && !empty($v['@type'])) {
+                $tmp = $this->cleanupJSON($v);
+                if (!empty($tmp)) {
+                    $arr[$k] = $tmp;
+                }
+            } elseif ($v != '') {
                 $arr[$k] = $v;
                 if ($k != '@type') {
                     $emty = false;
                 }
             }
         }
+        if ($arr['@type'] == 'ImageObject' && !empty($arr['url'])) {
+            $img = HTMLHelper::_('cleanImageURL', $arr['url']);
+            $arr['url'] = $img->url;
+        }
         if (!$emty) {
             return $arr;
         }
+    }
+
+    /**
+     *  To add plugin specific functions
+     *
+     *  @param   Registry $schema Schema form
+     *
+     *  @return  boolean
+     */
+    protected function cleanupIndividualSchema(Registry $schema)
+    {
+        //Write your code for extra filteration
+        return $schema;
     }
 }
