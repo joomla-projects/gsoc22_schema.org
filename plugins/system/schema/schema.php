@@ -15,6 +15,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
 use Joomla\CMS\Event\AbstractEvent;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Registry\Registry;
 
@@ -65,10 +66,10 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onBeforeCompileHead'                  => 'onBeforeCompileHead',
+            'onBeforeCompileHead'             => 'onBeforeCompileHead',
             'onContentPrepareData'            => 'onContentPrepareData',
             'onContentPrepareForm'            => 'onContentPrepareForm',
-            'onContentAfterSave'            => 'onContentAfterSave',
+            'onContentAfterSave'              => 'onContentAfterSave',
         ];
     }
 
@@ -90,7 +91,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        //$registry = new Registry($data);
+        $dispatcher = Factory::getApplication()->getDispatcher();
 
         $event   = AbstractEvent::create(
             'onSchemaPrepareData',
@@ -100,7 +101,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         );
 
         PluginHelper::importPlugin('schemaorg');
-        $this->app->getDispatcher()->dispatch('onSchemaPrepareData', $event);
+        $eventResult = $dispatcher->dispatch('onSchemaPrepareData', $event);
         return true;
     }
 
@@ -126,6 +127,8 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
 
+        $dispatcher = Factory::getApplication()->getDispatcher();
+
         $event   = AbstractEvent::create(
             'onSchemaPrepareForm',
             [
@@ -134,7 +137,7 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         );
 
         PluginHelper::importPlugin('schemaorg');
-        $this->app->getDispatcher()->dispatch('onSchemaPrepareForm', $event);
+        $eventResult = $dispatcher->dispatch('onSchemaPrepareForm', $event);
 
         return true;
     }
@@ -158,23 +161,23 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         $table = $event->getArgument('1');
         $isNew = $event->getArgument('2');
         $data = $event->getArgument('3');
-
         $registry = new Registry($data);
-        PluginHelper::importPlugin('schemaorg');
 
-        $this->app->getDispatcher()->dispatch(
+        $dispatcher = Factory::getApplication()->getDispatcher();
+
+        $event   = AbstractEvent::create(
             'onSchemaAfterSave',
-            AbstractEvent::create(
-                'onSchemaAfterSave',
-                [
+            [
                     'subject'       => $this,
                     'extension'     => $context,
                     'table'       => $table,
                     'isNew'         => $isNew,
                     'data'          => $registry,
                 ]
-            )
         );
+
+        PluginHelper::importPlugin('schemaorg');
+        $eventResult = $dispatcher->dispatch('onSchemaAfterSave', $event);
 
         return true;
     }
@@ -192,16 +195,16 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
             return;
         }
 
-        PluginHelper::importPlugin('schemaorg');
+        $dispatcher = Factory::getApplication()->getDispatcher();
 
-        $this->app->getDispatcher()->dispatch(
+        $event   = AbstractEvent::create(
             'onSchemaBeforeCompileHead',
-            AbstractEvent::create(
-                'onSchemaBeforeCompileHead',
-                [
+            [
                     'subject'       => $this
                 ]
-            )
         );
+
+        PluginHelper::importPlugin('schemaorg');
+        $eventResult = $dispatcher->dispatch('onSchemaBeforeCompileHead', $event);
     }
 }

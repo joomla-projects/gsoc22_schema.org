@@ -16,13 +16,14 @@ use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\Registry\Registry;
+use Joomla\Event\SubscriberInterface;
 
 /**
  * Schemaorg Plugin
  *
  * @since  4.0.0
  */
-class PlgSchemaorgBlog extends CMSPlugin
+class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
 {
     use SchemaorgPluginTrait;
 
@@ -49,6 +50,23 @@ class PlgSchemaorgBlog extends CMSPlugin
     protected $app;
 
     /**
+     * Returns an array of events this subscriber will listen to.
+     *
+     * @return  array
+     *
+     * @since   4.0.0
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            'onSchemaPrepareData'                  => 'onSchemaPrepareData',
+            'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
+            'onSchemaAfterSave'                    => 'onSchemaAfterSave',
+            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead',
+        ];
+    }
+
+    /**
      *  Update existing schema form with data from database
      *
      *  @param   $data  The form to be altered.
@@ -68,15 +86,15 @@ class PlgSchemaorgBlog extends CMSPlugin
      *
      *  @return  boolean
      */
-    public function onSchemaPrepareForm(Form $form)
+    public function onSchemaPrepareForm(AbstractEvent $event)
     {
+        $form = $event->getArgument('subject');
         if ($form->getName() != 'com_content.article') {
             return;
         }
 
         $this->addSchemaType($form, 'BlogPosting');
 
-        //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
     }
@@ -90,6 +108,12 @@ class PlgSchemaorgBlog extends CMSPlugin
      */
     public function onSchemaAfterSave(AbstractEvent $event)
     {
+        $data = $event->getArgument('data')->toArray();
+        $form = $data['schema']['schemaType'];
+
+        if ($form != 'BlogPosting') {
+            return;
+        }
         $this->storeSchemaToStandardLocation($event);
     }
 
@@ -114,15 +138,6 @@ class PlgSchemaorgBlog extends CMSPlugin
      */
     public function cleanupIndividualSchema(Registry $schema)
     {
-        if (is_object($schema)) {
-            $schema = $this->cleanupDate($schema, ['datePublished', 'dateModified']);
-        }
-        if (is_object($schema)) {
-            $schema = $this->normalizeDurationsToISO($schema, ['cookTime', 'prepTime']);
-        }
-        if (is_object($schema)) {
-            $schema = $this->convertToArray($schema, ['recipeIngredient']);
-        }
         if (is_object($schema)) {
             $schema = $this->cleanupDate($schema, ['datePublished']);
         }

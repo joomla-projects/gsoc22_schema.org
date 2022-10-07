@@ -16,13 +16,14 @@ use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\Registry\Registry;
+use Joomla\Event\SubscriberInterface;
 
 /**
  * Schemaorg Plugin
  *
  * @since  4.0.0
  */
-class PlgSchemaorgRecipe extends CMSPlugin
+class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
 {
     use SchemaorgPluginTrait;
 
@@ -49,6 +50,23 @@ class PlgSchemaorgRecipe extends CMSPlugin
     protected $app;
 
     /**
+     * Returns an array of events this subscriber will listen to.
+     *
+     * @return  array
+     *
+     * @since   4.0.0
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            'onSchemaPrepareData'                  => 'onSchemaPrepareData',
+            'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
+            'onSchemaAfterSave'                    => 'onSchemaAfterSave',
+            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead',
+        ];
+    }
+
+    /**
      *  Update existing schema form with data from database
      *
      *  @param   $data  The form to be altered.
@@ -68,8 +86,10 @@ class PlgSchemaorgRecipe extends CMSPlugin
      *
      *  @return  boolean
      */
-    public function onSchemaPrepareForm(Form $form)
+    public function onSchemaPrepareForm(AbstractEvent $event)
     {
+        $form = $event->getArgument('subject');
+
         if ($form->getName() != 'com_content.article') {
             return;
         }
@@ -90,6 +110,12 @@ class PlgSchemaorgRecipe extends CMSPlugin
      */
     public function onSchemaAfterSave(AbstractEvent $event)
     {
+        $data = $event->getArgument('data')->toArray();
+        $form = $data['schema']['schemaType'];
+
+        if ($form != 'Recipe') {
+            return;
+        }
         $this->storeSchemaToStandardLocation($event);
     }
 

@@ -113,6 +113,7 @@ trait SchemaorgPluginTrait
     protected function updateSchemaForm(GenericEvent $event)
     {
         $data = $event->getArgument('subject');
+
         if (!is_object($data)) {
             return false;
         } else {
@@ -120,24 +121,26 @@ trait SchemaorgPluginTrait
 
             //Check if the form already has some data
             if (!isset($data->schema) && $itemId > 0) {
-                // Load the table data from the database
                 $db = $this->db;
+
                 $query = $db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__schemaorg'))
                 ->where('itemId = ' . $itemId);
-                $db->setQuery($query);
-                $results = $db->loadAssoc();
+
+                $results = $db->setQuery($query)->loadAssoc();
 
                 if (empty($results)) {
                     return false;
                 }
+
                 $schemaType = $results['schemaType'];
                 $data->schema = [];
                 $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
                 $data->schema['schemaType'] = $schemaType;
 
                 $form = json_decode($results['schemaForm'], true);
+
                 if ($form) {
                     // Insert existing data into form fields
                     foreach ($form as $key => $val) {
