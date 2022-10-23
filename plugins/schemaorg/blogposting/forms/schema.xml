@@ -21,7 +21,7 @@
 					<field
 						name="noteBlogPost"
 						type="note"
-						description="PLG_SCHEMAORG_BLOG_DESCRIPTION_LABEL"
+						description="PLG_SCHEMAORG_BLOGPOSTING_DESCRIPTION_LABEL"
 						class="alert alert-info w-100"
 					/>
 
@@ -29,7 +29,7 @@
 					<field 
 						name="image"
 						type="media"
-						label="PLG_SCHEMAORG_BLOG_FIELD_IMAGE_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_IMAGE_LABEL"
 					/>
 
 					<field
@@ -37,19 +37,19 @@
 						type="text"
 						filter="string"
 						size="30"
-						label="PLG_SCHEMAORG_BLOG_FIELD_HEADLINE_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_HEADLINE_LABEL"
 					/>
 
 					<field
 						name="description"
 						type="text"
 						filter="string"
-						label="PLG_SCHEMAORG_BLOG_FIELD_DESCRIPTION_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_DESCRIPTION_LABEL"
 					/>
 
 					<field
 						name="author"
-						label="PLG_SCHEMAORG_BLOG_FIELD_AUTHOR_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_AUTHOR_LABEL"
 						type="subform"
 						>
 						<form>
@@ -60,15 +60,15 @@
 								label="Type"
 								default="person"
 								>
-								<option value="person">PLG_SCHEMAORG_BLOG_FIELD_PERSON_LABEL</option>
-								<option value="organization">PLG_SCHEMAORG_BLOG_FIELD_ORGANIZATION_LABEL</option>
+								<option value="person">PLG_SCHEMAORG_BLOGPOSTING_FIELD_PERSON_LABEL</option>
+								<option value="organization">PLG_SCHEMAORG_BLOGPOSTING_FIELD_ORGANIZATION_LABEL</option>
 							</field>
 
 							<field
 								name="name"
 								type="text"
 								filter="string"
-								label="PLG_SCHEMAORG_BLOG_FIELD_NAME_LABEL"
+								label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_NAME_LABEL"
 							/>
 
 							<field
@@ -76,7 +76,7 @@
 								type="url"
 								filter="url"
 								validate="url"
-								label="PLG_SCHEMAORG_BLOG_FIELD_URL_LABEL"
+								label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_URL_LABEL"
 							/>
 
 							<field
@@ -96,7 +96,7 @@
 									<field
 										name="url"
 										type="media"
-										label="PLG_SCHEMAORG_BLOG_FIELD_URL_LABEL"
+										label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_URL_LABEL"
 									/>
 
 								</form>
@@ -106,13 +106,13 @@
 								name="email"
 								type="email"
 								validate="email"
-								label="PLG_SCHEMAORG_BLOG_FIELD_EMAIL_LABEL"
+								label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_EMAIL_LABEL"
 							/>
 
 							<field
 								name="address"
 								type="subform"
-								label="PLG_SCHEMAORG_BLOG_FIELD_ADDRESS_LABEL"
+								label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_ADDRESS_LABEL"
 							>
 								<form>
 									
@@ -125,19 +125,19 @@
 									<field
 										name="addressLocality"
 										type="text"
-										label="PLG_SCHEMAORG_BLOG_FIELD_LOCALITY_LABEL"
+										label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_LOCALITY_LABEL"
 									/>
 
 									<field
 										name="postalCode"
 										type="text"
-										label="PLG_SCHEMAORG_BLOG_FIELD_POSTAL_CODE_LABEL"
+										label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_POSTAL_CODE_LABEL"
 									/>
 
 									<field
 										name="streetAddress"
 										type="text"
-										label="PLG_SCHEMAORG_BLOG_FIELD_STREET_ADDRESS_LABEL"
+										label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_STREET_ADDRESS_LABEL"
 									/>
 
 								</form>
@@ -149,7 +149,7 @@
 					<field
 						name="datePublished"
 						type="calendar"
-						label="PLG_SCHEMAORG_BLOG_FIELD_DATE_PUBLISHED_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_DATE_PUBLISHED_LABEL"
 						class="input-small"
 						filter="user_utc"
 						showtime="false" 
@@ -160,7 +160,7 @@
 					<field
 						name="dateModified"
 						type="calendar"
-						label="PLG_SCHEMAORG_BLOG_FIELD_DATE_MODIFIED_LABEL"
+						label="PLG_SCHEMAORG_BLOGPOSTING_FIELD_DATE_MODIFIED_LABEL"
 						class="input-small"
 						filter="user_utc"
 						showtime="false" 

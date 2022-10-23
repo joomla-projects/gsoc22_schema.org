@@ -23,7 +23,7 @@ use Joomla\Event\SubscriberInterface;
  *
  * @since  4.0.0
  */
-class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
+class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
 {
     use SchemaorgPluginTrait;
 
@@ -59,24 +59,11 @@ class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onSchemaPrepareData'                  => 'onSchemaPrepareData',
+            'onSchemaPrepareData'                  => 'updateSchemaForm',
             'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
             'onSchemaAfterSave'                    => 'onSchemaAfterSave',
-            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead',
+            'onSchemaBeforeCompileHead'            => 'pushSchema',
         ];
-    }
-
-    /**
-     *  Update existing schema form with data from database
-     *
-     *  @param   $data  The form to be altered.
-     *
-     *  @return  boolean
-     */
-    public function onSchemaPrepareData(AbstractEvent $event)
-    {
-        $this->updateSchemaForm($event);
-        return true;
     }
 
      /**
@@ -89,12 +76,14 @@ class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareForm(AbstractEvent $event)
     {
         $form = $event->getArgument('subject');
+
         if ($form->getName() != 'com_content.article') {
             return;
         }
 
         $this->addSchemaType($form, 'BlogPosting');
 
+        //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
     }
@@ -118,18 +107,6 @@ class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
     }
 
     /**
-     *  Fetches schema and pushes to the head tag in the frontend
-     *
-     *  @param   AbstractEvent $event
-     *
-     *  @return  boolean
-     */
-    public function onSchemaBeforeCompileHead()
-    {
-        $this->pushSchema();
-    }
-
-    /**
      *  To add plugin specific functions
      *
      *  @param   Registry $schema Schema form
@@ -139,7 +116,7 @@ class PlgSchemaorgBlog extends CMSPlugin implements SubscriberInterface
     public function cleanupIndividualSchema(Registry $schema)
     {
         if (is_object($schema)) {
-            $schema = $this->cleanupDate($schema, ['datePublished']);
+            $schema = $this->cleanupDate($schema, ['datePublished','dateModified']);
         }
         return $schema;
     }

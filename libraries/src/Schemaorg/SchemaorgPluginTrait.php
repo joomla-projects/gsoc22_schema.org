@@ -14,6 +14,7 @@ use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\Event\EventInterface;
 use Joomla\Registry\Registry;
 
 /**
@@ -110,7 +111,7 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function updateSchemaForm(GenericEvent $event)
+    public function updateSchemaForm(EventInterface $event)
     {
         $data = $event->getArgument('subject');
 
@@ -219,7 +220,7 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    protected function pushSchema()
+    public function pushSchema()
     {
         $itemId = $this->app->getInput()->getInt('id');
 
