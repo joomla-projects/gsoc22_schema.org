@@ -14,6 +14,7 @@ use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\Database\ParameterType;
 use Joomla\Event\EventInterface;
 use Joomla\Registry\Registry;
 
@@ -72,7 +73,7 @@ trait SchemaorgPluginTrait
             if (!$isNew) {
                 $res = $db->getQuery(true)
                 ->delete($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $table->id);
+                ->where('itemId = ' . $table->id . " AND context = '" . $context . " ' ");
                 $db->setQuery($res)->execute();
             }
 
@@ -114,6 +115,7 @@ trait SchemaorgPluginTrait
     public function updateSchemaForm(EventInterface $event)
     {
         $data = $event->getArgument('subject');
+        $context = $event->getArgument('context');
 
         if (!is_object($data)) {
             return false;
@@ -127,7 +129,7 @@ trait SchemaorgPluginTrait
                 $query = $db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $itemId);
+                ->where('itemId = ' . $itemId . " AND context = '" . $context . " ' ");
 
                 $results = $db->setQuery($query)->loadAssoc();
 
@@ -168,7 +170,6 @@ trait SchemaorgPluginTrait
                 $data->schema['itemId'] = $itemId;
             }
         }
-        $event->setArgument('subject', $data);
         return true;
     }
 
@@ -222,7 +223,10 @@ trait SchemaorgPluginTrait
      */
     public function pushSchema()
     {
-        $itemId = $this->app->getInput()->getInt('id');
+        $itemId = (int) $this->app->getInput()->getInt('id');
+        $option = $this->app->getInput()->get('option');
+        $view = $this->app->getInput()->get('view');
+        $context = $option . '.' . $view;
 
         if ($itemId > 0) {
             // Load the table data from the database
@@ -230,7 +234,11 @@ trait SchemaorgPluginTrait
             $query = $db->getQuery(true)
             ->select('*')
             ->from($db->quoteName('#__schemaorg'))
-            ->where('itemId = ' . $itemId);
+            ->where($db->quoteName('itemId') . '= :itemId')
+            ->bind(':itemId', $itemId, ParameterType::INTEGER)
+            ->where($db->quoteName('context') . '= :context')
+            ->bind(':context', $context, ParameterType::STRING);
+
             $db->setQuery($query);
             $results = $db->loadAssoc();
 
@@ -384,5 +392,36 @@ trait SchemaorgPluginTrait
     {
         //Write your code for extra filteration
         return $schema;
+    }
+
+    /**
+     * Check if the context is listed in the allowed or forbidden lists and return the result.
+     *
+     * @param   string $context Context to check
+     *
+     * @return  boolean
+     */
+    protected function isSupported($context)
+    {
+        $allowedlist = \array_filter((array) $this->params->get('allowedlist', []));
+        $forbiddenlist = \array_filter((array) $this->params->get('forbiddenlist', []));
+
+        if (!empty($allowedlist)) {
+            foreach ($allowedlist as $allowed) {
+                if ($context === $allowed) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        foreach ($forbiddenlist as $forbidden) {
+            if ($context === $forbidden) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -13,6 +13,7 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
+use Joomla\CMS\Schemaorg\SchemaorgServiceInterface;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\Registry\Registry;
@@ -75,6 +76,10 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
      */
     public function onSchemaPrepareData(AbstractEvent $event)
     {
+        $context = $event->getArgument('context');
+        if (!$this->isSupported($context)) {
+            return true;
+        }
         $this->updateSchemaForm($event);
         return true;
     }
@@ -89,9 +94,10 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareForm(AbstractEvent $event)
     {
         $form = $event->getArgument('subject');
+        $context = $form->getName();
 
-        if ($form->getName() != 'com_content.article') {
-            return;
+        if (!$this->isSupported($context)) {
+            return true;
         }
 
         $this->addSchemaType($form, 'Recipe');

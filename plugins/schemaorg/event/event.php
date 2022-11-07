@@ -59,7 +59,7 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onSchemaPrepareData'                  => 'updateSchemaForm',
+            'onSchemaPrepareData'                  => 'onSchemaPrepareData',
             'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
             'onSchemaAfterSave'                    => 'onSchemaAfterSave',
             'onSchemaBeforeCompileHead'            => 'pushSchema',
@@ -75,6 +75,10 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
      */
     public function onSchemaPrepareData(AbstractEvent $event)
     {
+        $context = $event->getArgument('context');
+        if (!$this->isSupported($context)) {
+            return true;
+        }
         $this->updateSchemaForm($event);
         return true;
     }
@@ -89,9 +93,10 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareForm(AbstractEvent $event)
     {
         $form = $event->getArgument('subject');
+        $context = $form->getName();
 
-        if ($form->getName() != 'com_content.article') {
-            return;
+        if (!$this->isSupported($context)) {
+            return true;
         }
 
         $this->addSchemaType($form, 'Event');

@@ -29,6 +29,7 @@ use Joomla\CMS\Tag\TagServiceInterface;
 use Joomla\CMS\Tag\TagServiceTrait;
 use Joomla\CMS\Workflow\WorkflowServiceInterface;
 use Joomla\CMS\Workflow\WorkflowServiceTrait;
+use Joomla\CMS\Schemaorg\SchemaorgServiceInterface;
 use Joomla\Component\Content\Administrator\Helper\ContentHelper;
 use Joomla\Component\Content\Administrator\Service\HTML\AdministratorService;
 use Joomla\Component\Content\Administrator\Service\HTML\Icon;
@@ -48,6 +49,7 @@ class ContentComponent extends MVCComponent implements
     CategoryServiceInterface,
     FieldsServiceInterface,
     AssociationServiceInterface,
+    SchemaorgServiceInterface,
     WorkflowServiceInterface,
     RouterServiceInterface,
     TagServiceInterface
@@ -176,6 +178,25 @@ class ContentComponent extends MVCComponent implements
         $contexts = array(
             'com_content.article'    => Text::_('COM_CONTENT'),
             'com_content.categories' => Text::_('JCATEGORY')
+        );
+
+        return $contexts;
+    }
+
+     /**
+     * Returns valid contexts for schemaorg
+     *
+     * @return  array
+     *
+     * @since   4.0.0
+     */
+    public function getSchemaorgContexts(): array
+    {
+        Factory::getLanguage()->load('com_content', JPATH_ADMINISTRATOR);
+
+        $contexts = array(
+            'com_content.article'    => Text::_('COM_CONTENT'),
+            'com_contact.contact'    => Text::_('COM_CONTACT')
         );
 
         return $contexts;
