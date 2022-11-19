@@ -189,7 +189,8 @@ trait SchemaorgPluginTrait
      *
      * @since   4.0.0
      */
-    public function isSchemaSupported(EventInterface $event){
+    public function isSchemaSupported(EventInterface $event)
+    {
         $data = $event->getArgument('subject');
         $context = $event->getArgument('context');
 
