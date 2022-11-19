@@ -12,7 +12,6 @@ namespace Joomla\CMS\Schemaorg;
 use Joomla\CMS\Event\GenericEvent;
 use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\Database\ParameterType;
 use Joomla\Event\EventInterface;
@@ -28,15 +27,17 @@ trait SchemaorgPluginTrait
     /**
      * Add a new option to schemaType list field in schema form
      *
-     * @param   Form $form  Form to manipulate
-     * @param   String $name Name of the schema type eg: "Recipe", "Blog" etc
+     * @param   EventInterface $event
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function addSchemaType(Form $form, string $name)
+    protected function addSchemaType(EventInterface $event)
     {
+        $form = $event->getArgument('subject');
+        $name = $this->pluginName;
+
         if (!$form || !$name) {
             return false;
         }
@@ -73,7 +74,11 @@ trait SchemaorgPluginTrait
             if (!$isNew) {
                 $res = $db->getQuery(true)
                 ->delete($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $table->id . " AND context = '" . $context . " ' ");
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $table->id, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
+
                 $db->setQuery($res)->execute();
             }
 
@@ -116,7 +121,6 @@ trait SchemaorgPluginTrait
     {
         $data = $event->getArgument('subject');
         $context = $event->getArgument('context');
-        $schemaName = $event->getArgument('schemaType');
 
         if (!is_object($data)) {
             return false;
@@ -130,7 +134,10 @@ trait SchemaorgPluginTrait
                 $query = $db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $itemId . " AND context = '" . $context . " ' ");
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $itemId, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
 
                 $results = $db->setQuery($query)->loadAssoc();
 
@@ -139,14 +146,8 @@ trait SchemaorgPluginTrait
                 }
 
                 $schemaType = $results['schemaType'];
-
-                if (!$this->isSupported($context) || $schemaName != $schemaType) {
-                    return false;
-                }
-
-                $data->schema = [];
-                $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
                 $data->schema['schemaType'] = $schemaType;
+                $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
 
                 $form = json_decode($results['schemaForm'], true);
 
@@ -174,6 +175,50 @@ trait SchemaorgPluginTrait
             } else {
                 //Insert article id as it is a hidden field
                 $data->schema['itemId'] = $itemId;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Call update schema function only if the plugin is not listed in allowed or forbidden
+     *
+     * @param   EventInterface $event
+     *
+     * @return  boolean
+     *
+     * @since   4.0.0
+     */
+    public function isSchemaSupported(EventInterface $event){
+        $data = $event->getArgument('subject');
+        $context = $event->getArgument('context');
+
+        if (!is_object($data)) {
+            return false;
+        } else {
+            $itemId = $data->id ?? 0;
+            if (!isset($data->schema) && $itemId > 0) {
+                $db = $this->db;
+
+                $query = $db->getQuery(true)
+                ->select('*')
+                ->from($db->quoteName('#__schemaorg'))
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $itemId, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
+
+                $results = $db->setQuery($query)->loadAssoc();
+
+                if (empty($results)) {
+                    return false;
+                }
+
+                $schemaType = $results['schemaType'];
+
+                if ($this->pluginName != $schemaType) {
+                    return false;
+                }
             }
         }
         return true;
@@ -248,9 +293,10 @@ trait SchemaorgPluginTrait
             $db->setQuery($query);
             $results = $db->loadAssoc();
 
-            if (!$results) {
-                return;
+            if (!$results || !$this->isSupported($context) || $results['schemaType'] != $this->pluginName) {
+                return false;
             }
+
             $schema = $results['schema'];
 
             if (!empty($schema)) {
@@ -258,6 +304,7 @@ trait SchemaorgPluginTrait
                 $wa->addInlineScript($schema, ['position' => 'after'], ['type' => 'application/ld+json']);
             }
         }
+        return true;
     }
 
     /**

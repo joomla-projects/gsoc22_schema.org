@@ -78,7 +78,7 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
             'onSchemaPrepareData'                  => 'onSchemaPrepareData',
             'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
             'onSchemaAfterSave'                    => 'onSchemaAfterSave',
-            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead'
+            'onSchemaBeforeCompileHead'            => 'pushSchema'
         ];
     }
 
@@ -92,10 +92,9 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareData(AbstractEvent $event)
     {
         $context = $event->getArgument('context');
-        if (!$this->isSupported($context)) {
-            return true;
+        if (!$this->isSupported($context) || !$this->isSchemaSupported($event)) {
+            return false;
         }
-        $event->addArgument('schemaType', $this->pluginName);
         $this->updateSchemaForm($event);
         return true;
     }
@@ -111,16 +110,14 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
     {
         $form = $event->getArgument('subject');
         $context = $form->getName();
-
         if (!$this->isSupported($context)) {
-            return true;
+            return false;
         }
-
-        $this->addSchemaType($form, $this->pluginName);
-
+        $this->addSchemaType($event);
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
+        return true;
     }
 
     /**
@@ -136,31 +133,18 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
         $form = $data['schema']['schemaType'];
 
         if ($form != $this->pluginName) {
-            return;
+            return false;
         }
         $this->storeSchemaToStandardLocation($event);
+        return true;
     }
-
-    /**
-     *  Fetches schema and pushes to the head tag in the frontend
-     *
-     *  @param   AbstractEvent $event
-     *
-     *  @return  boolean
-     */
-    public function onSchemaBeforeCompileHead()
-    {
-        $this->pushSchema();
-    }
-
-
 
     /**
      *  To add plugin specific functions
      *
      *  @param   Registry $schema Schema form
      *
-     *  @return  boolean
+     *  @return  Registry $schema Updated schema form
      */
     public function cleanupIndividualSchema(Registry $schema)
     {

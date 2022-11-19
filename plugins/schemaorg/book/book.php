@@ -92,10 +92,9 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareData(AbstractEvent $event)
     {
         $context = $event->getArgument('context');
-        if (!$this->isSupported($context)) {
-            return true;
+        if (!$this->isSupported($context) || !$this->isSchemaSupported($event)) {
+            return false;
         }
-        $event->addArgument('schemaType', $this->pluginName);
         $this->updateSchemaForm($event);
         return true;
     }
@@ -110,17 +109,15 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareForm(AbstractEvent $event)
     {
         $form = $event->getArgument('subject');
-
         $context = $form->getName();
-
         if (!$this->isSupported($context)) {
-            return true;
+            return false;
         }
-        $this->addSchemaType($form, $this->pluginName);
-
+        $this->addSchemaType($event);
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
+        return true;
     }
 
     /**
@@ -136,9 +133,10 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
         $form = $data['schema']['schemaType'];
 
         if ($form != $this->pluginName) {
-            return;
+            return false;
         }
         $this->storeSchemaToStandardLocation($event);
+        return true;
     }
 
 
@@ -148,16 +146,10 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
      *
      *  @param   Registry $schema Schema form
      *
-     *  @return  boolean
+     *  @return  Registry $schema Updated schema form
      */
     public function cleanupIndividualSchema(Registry $schema)
     {
-        if (is_object($schema)) {
-            $schema = $this->normalizeDurationsToISO($schema, ['cookTime', 'prepTime']);
-        }
-        if (is_object($schema)) {
-            $schema = $this->convertToArray($schema, ['recipeIngredient']);
-        }
         if (is_object($schema)) {
             $schema = $this->cleanupDate($schema, ['datePublished']);
         }
