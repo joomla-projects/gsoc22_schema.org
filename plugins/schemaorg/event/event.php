@@ -50,6 +50,22 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
     protected $app;
 
     /**
+     * The name of the supported name to check against
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $supportFunctionality = 'core.state';
+
+    /**
+     * The name of the schema form
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $pluginName = 'Event';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -99,7 +115,7 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        $this->addSchemaType($form, 'Event');
+        $this->addSchemaType($form, $this->pluginName);
 
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
@@ -118,25 +134,11 @@ class PlgSchemaorgEvent extends CMSPlugin implements SubscriberInterface
         $data = $event->getArgument('data')->toArray();
         $form = $data['schema']['schemaType'];
 
-        if ($form != 'Event') {
+        if ($form != $this->pluginName) {
             return;
         }
         $this->storeSchemaToStandardLocation($event);
     }
-
-    /**
-     *  Fetches schema and pushes to the head tag in the frontend
-     *
-     *  @param   AbstractEvent $event
-     *
-     *  @return  boolean
-     */
-    public function onSchemaBeforeCompileHead()
-    {
-        $this->pushSchema();
-    }
-
-
 
     /**
      *  To add plugin specific functions

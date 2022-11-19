@@ -395,13 +395,69 @@ trait SchemaorgPluginTrait
     }
 
     /**
-     * Check if the context is listed in the allowed or forbidden lists and return the result.
+     * Get the schemaorg for a given ID
+     *
+     * @param   int|null $schemaorgId ID of the schemaorg
+     *
+     * @return  CMSObject|boolean  Object on success, false on failure.
+     *
+     * @since   4.0.0
+     */
+    protected function getSchemaorg(int $schemaorgId = null)
+    {
+        $schemaorgId = !empty($schemaorgId) ? $schemaorgId : $this->app->input->getInt('schemaorg_id');
+
+        if (is_array($schemaorgId)) {
+            return false;
+        }
+
+        return $this->app->bootComponent('com_schemaorg')
+            ->getMVCFactory()
+            ->createModel('Schemaorg', 'Administrator', ['ignore_request' => true])
+            ->getItem($schemaorgId);
+    }
+
+    /**
+     * Check if the current plugin should execute schemaorg related activities
+     *
+     * @param   string  $context
+     *
+     * @return boolean
+     *
+     * @since   4.0.0
+     */
+    protected function isSupported($context)
+    {
+        if (!$this->checkAllowedAndForbiddenlist($context) || !$this->checkExtensionSupport($context, $this->supportFunctionality)) {
+            return false;
+        }
+
+        $parts = explode('.', $context);
+
+        // We need at least the extension + view for loading the table fields
+        if (count($parts) < 2) {
+            return false;
+        }
+
+        $component = $this->app->bootComponent($parts[0]);
+
+        if (
+            !$component instanceof SchemaorgServiceInterface
+            || !$component->supportSchemaFunctionality($this->supportFunctionality, $context)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check if the context is listed in the allowed of forbidden lists and return the result.
      *
      * @param   string $context Context to check
      *
      * @return  boolean
      */
-    protected function isSupported($context)
+    protected function checkAllowedAndForbiddenlist($context)
     {
         $allowedlist = \array_filter((array) $this->params->get('allowedlist', []));
         $forbiddenlist = \array_filter((array) $this->params->get('forbiddenlist', []));
@@ -422,6 +478,29 @@ trait SchemaorgPluginTrait
             }
         }
 
+        return true;
+    }
+
+    /**
+     * Check if the context supports a specific functionality.
+     *
+     * @param   string  $context       Context to check
+     * @param   string  $functionality The functionality
+     *
+     * @return  boolean
+     */
+    protected function checkExtensionSupport($context, $functionality)
+    {
+        $parts = explode('.', $context);
+
+        $component = $this->app->bootComponent($parts[0]);
+
+        if (
+            !$component instanceof SchemaorgServiceInterface
+            || !$component->supportSchemaFunctionality($functionality, $context)
+        ) {
+            return false;
+        }
         return true;
     }
 }

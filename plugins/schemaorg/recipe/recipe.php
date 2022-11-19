@@ -13,7 +13,6 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
-use Joomla\CMS\Schemaorg\SchemaorgServiceInterface;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\Registry\Registry;
@@ -51,6 +50,14 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
     protected $app;
 
     /**
+     * The name of the supported name to check against
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $supportFunctionality = 'core.state';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -63,7 +70,7 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
             'onSchemaPrepareData'                  => 'onSchemaPrepareData',
             'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
             'onSchemaAfterSave'                    => 'onSchemaAfterSave',
-            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead',
+            'onSchemaBeforeCompileHead'            => 'onSchemaBeforeCompileHead'
         ];
     }
 

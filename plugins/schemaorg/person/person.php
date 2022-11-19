@@ -13,9 +13,9 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
+use Joomla\CMS\Schemaorg\SchemaorgServiceInterface;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
-use Joomla\Registry\Registry;
 use Joomla\Event\SubscriberInterface;
 
 /**
@@ -50,6 +50,22 @@ class PlgSchemaorgPerson extends CMSPlugin implements SubscriberInterface
     protected $app;
 
     /**
+     * The name of the supported name to check against
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $supportFunctionality = 'core.state';
+
+    /**
+     * The name of the schema form
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $pluginName = 'Person';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -77,7 +93,6 @@ class PlgSchemaorgPerson extends CMSPlugin implements SubscriberInterface
     {
         $context = $event->getArgument('context');
         if (!$this->isSupported($context)) {
-            die($context);
             return true;
         }
         $this->updateSchemaForm($event);
@@ -100,7 +115,7 @@ class PlgSchemaorgPerson extends CMSPlugin implements SubscriberInterface
         if (!$this->isSupported($context)) {
             return true;
         }
-        $this->addSchemaType($form, 'Person');
+        $this->addSchemaType($form, $this->pluginName);
 
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
@@ -119,21 +134,42 @@ class PlgSchemaorgPerson extends CMSPlugin implements SubscriberInterface
         $data = $event->getArgument('data')->toArray();
         $form = $data['schema']['schemaType'];
 
-        if ($form != 'Person') {
+        if ($form != $this->pluginName) {
             return;
         }
         $this->storeSchemaToStandardLocation($event);
     }
 
     /**
-     *  Fetches schema and pushes to the head tag in the frontend
+     * Check if the current plugin should execute schemaorg related activities
      *
-     *  @param   AbstractEvent $event
+     * @param   string  $context
      *
-     *  @return  boolean
+     * @return boolean
+     *
+     * @since   4.0.0
      */
-    public function onSchemaBeforeCompileHead()
+    protected function isSupported($context)
     {
-        $this->pushSchema();
+        if (!$this->checkAllowedAndForbiddenlist($context) || !$this->checkExtensionSupport($context, $this->supportFunctionality)) {
+            return false;
+        }
+
+        $parts = explode('.', $context);
+
+        // We need at least the extension + view for loading the table fields
+        if (count($parts) < 2) {
+            return false;
+        }
+
+        $component = $this->app->bootComponent($parts[0]);
+
+        if (
+            !$component instanceof SchemaorgServiceInterface
+            || !$component->supportSchemaFunctionality($this->supportFunctionality, $context)
+        ) {
+            return false;
+        }
+        return true;
     }
 }

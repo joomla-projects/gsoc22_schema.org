@@ -50,6 +50,22 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
     protected $app;
 
     /**
+     * The name of the supported name to check against
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $supportFunctionality = 'core.state';
+
+    /**
+     * The name of the schema form
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $pluginName = 'BlogPosting';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -100,7 +116,7 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        $this->addSchemaType($form, 'BlogPosting');
+        $this->addSchemaType($form, $this->pluginName);
 
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
@@ -119,7 +135,7 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
         $data = $event->getArgument('data')->toArray();
         $form = $data['schema']['schemaType'];
 
-        if ($form != 'BlogPosting') {
+        if ($form != $this->pluginName) {
             return;
         }
         $this->storeSchemaToStandardLocation($event);
