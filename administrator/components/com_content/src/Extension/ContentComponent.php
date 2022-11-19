@@ -197,8 +197,7 @@ class ContentComponent extends MVCComponent implements
         Factory::getLanguage()->load('com_content', JPATH_ADMINISTRATOR);
 
         $contexts = array(
-            'com_content.article'    => Text::_('COM_CONTENT'),
-            'com_contact.contact'    => Text::_('COM_CONTACT')
+            'com_content.article'    => Text::_('COM_CONTENT')
         );
 
         return $contexts;

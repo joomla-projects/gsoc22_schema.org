@@ -2,12 +2,7 @@
 
 namespace Joomla\CMS\Schemaorg;
 
-use Joomla\CMS\Component\ComponentHelper;
-use Joomla\CMS\Event\AbstractEvent;
-use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
-use Joomla\CMS\MVC\Model\SchemaorgModelInterface;
-use Joomla\Event\DispatcherAwareInterface;
 
 // phpcs:disable PSR1.Files.SideEffects
 \defined('JPATH_PLATFORM') or die;
