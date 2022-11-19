@@ -58,6 +58,14 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
     protected $supportFunctionality = 'core.state';
 
     /**
+     * The name of the schema form
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $pluginName = 'Recipe';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -87,6 +95,7 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
         if (!$this->isSupported($context)) {
             return true;
         }
+        $event->addArgument('schemaType', $this->pluginName);
         $this->updateSchemaForm($event);
         return true;
     }
@@ -107,7 +116,7 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
             return true;
         }
 
-        $this->addSchemaType($form, 'Recipe');
+        $this->addSchemaType($form, $this->pluginName);
 
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
@@ -126,7 +135,7 @@ class PlgSchemaorgRecipe extends CMSPlugin implements SubscriberInterface
         $data = $event->getArgument('data')->toArray();
         $form = $data['schema']['schemaType'];
 
-        if ($form != 'Recipe') {
+        if ($form != $this->pluginName) {
             return;
         }
         $this->storeSchemaToStandardLocation($event);

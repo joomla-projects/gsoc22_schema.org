@@ -95,6 +95,7 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
         if (!$this->isSupported($context)) {
             return true;
         }
+        $event->addArgument('schemaType', $this->pluginName);
         $this->updateSchemaForm($event);
         return true;
     }

@@ -116,6 +116,7 @@ trait SchemaorgPluginTrait
     {
         $data = $event->getArgument('subject');
         $context = $event->getArgument('context');
+        $schemaName = $event->getArgument('schemaType');
 
         if (!is_object($data)) {
             return false;
@@ -138,6 +139,11 @@ trait SchemaorgPluginTrait
                 }
 
                 $schemaType = $results['schemaType'];
+
+                if (!$this->isSupported($context) || $schemaName != $schemaType) {
+                    return false;
+                }
+
                 $data->schema = [];
                 $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
                 $data->schema['schemaType'] = $schemaType;

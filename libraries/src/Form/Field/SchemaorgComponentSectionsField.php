@@ -1,4 +1,5 @@
 <?php
+
 namespace Joomla\CMS\Form\Field;
 
 use Joomla\CMS\Factory;
@@ -24,8 +25,7 @@ class SchemaorgComponentSectionsField extends ComponentsField
      * @since  4.0.0
      */
     protected $type = 'SchemaorgComponentSections';
-
-    /**
+/**
      * Method to get a list of options for a list input.
      *
      * @return  array  An array of JHtml options.
@@ -38,14 +38,12 @@ class SchemaorgComponentSectionsField extends ComponentsField
         $items     = parent::getOptions();
         $options   = [];
         $options[] = HTMLHelper::_('select.option', ' ', Text::_('JNONE'));
-
         foreach ($items as $item) {
             if (substr($item->value, 0, 4) !== 'com_') {
                 continue;
             }
 
             $component = $app->bootComponent($item->value);
-
             if (!($component instanceof SchemaorgServiceInterface)) {
                 continue;
             }
