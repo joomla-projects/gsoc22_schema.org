@@ -177,7 +177,7 @@
 					<field
 						name="genericField"
 						type="subform"
-						label="Generic Field"
+						label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_FIELD_LABEL"
 						multiple="true"
 					>
 						<form>
@@ -186,14 +186,14 @@
 								type="text"
 								filter="string"
 								size="30"
-								label="Title"
+								label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_TITLE_LABEL"
 							/>
 							<field
 								name="genericValue"
 								type="text"
 								filter="string"
 								size="30"
-								label="Value"
+								label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_VALUE_LABEL"
 							/>
 						</form>
 					
