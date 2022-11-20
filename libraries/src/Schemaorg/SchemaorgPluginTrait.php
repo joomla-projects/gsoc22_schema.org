@@ -226,15 +226,15 @@ trait SchemaorgPluginTrait
     }
 
     /**
-     * Removes empty field and changes time duration to ISO format in schema form
+     * Removes empty fields and changes time duration to ISO format in schema form
      *
-     * @param   $data JSON object of the data stored in schema form
+     * @param   Registry $data JSON object of the data stored in schema form
      *
-     * @return  object
+     * @return  Registry
      *
      * @since   4.0.0
      */
-    protected function cleanupSchema($data)
+    protected function cleanupSchema(Registry $data)
     {
         if (is_object($data)) {
             //Create object to insert data into database
@@ -248,6 +248,10 @@ trait SchemaorgPluginTrait
                         $tmp = $this->cleanupJSON($val);
                         if (!empty($tmp)) {
                             $newSchema->set($key, $tmp);
+                        }
+                    } elseif (is_array($val) && $key == 'genericField') {
+                        foreach ($val as $field) {
+                            $newSchema->set($field['genericTitle'], $field['genericValue']);
                         }
                     } elseif (!empty($val)) {
                         $newSchema->set($key, $val);
@@ -440,35 +444,12 @@ trait SchemaorgPluginTrait
      *
      *  @param   Registry $schema Schema form
      *
-     *  @return  boolean
+     *  @return  Registry
      */
     protected function cleanupIndividualSchema(Registry $schema)
     {
         //Write your code for extra filteration
         return $schema;
-    }
-
-    /**
-     * Get the schemaorg for a given ID
-     *
-     * @param   int|null $schemaorgId ID of the schemaorg
-     *
-     * @return  CMSObject|boolean  Object on success, false on failure.
-     *
-     * @since   4.0.0
-     */
-    protected function getSchemaorg(int $schemaorgId = null)
-    {
-        $schemaorgId = !empty($schemaorgId) ? $schemaorgId : $this->app->input->getInt('schemaorg_id');
-
-        if (is_array($schemaorgId)) {
-            return false;
-        }
-
-        return $this->app->bootComponent('com_schemaorg')
-            ->getMVCFactory()
-            ->createModel('Schemaorg', 'Administrator', ['ignore_request' => true])
-            ->getItem($schemaorgId);
     }
 
     /**

@@ -80,6 +80,31 @@
 						</form>
 					</field>
 
+					<field
+						name="genericField"
+						type="subform"
+						label="Generic Field"
+						multiple="true"
+					>
+						<form>
+							<field
+								name="genericTitle"
+								type="text"
+								filter="string"
+								size="30"
+								label="Title"
+							/>
+							<field
+								name="genericValue"
+								type="text"
+								filter="string"
+								size="30"
+								label="Value"
+							/>
+						</form>
+					
+					</field>
+
 				</form>
 			</field>
 		</fieldset>
