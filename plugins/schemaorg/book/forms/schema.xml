@@ -173,6 +173,31 @@
 						type="number"
 						label="PLG_SCHEMAORG_BOOK_FIELD_NUMBER_OF_PAGES_LABEL"
 					/>
+
+					<field
+						name="genericField"
+						type="subform"
+						label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_FIELD_LABEL"
+						multiple="true"
+					>
+						<form>
+							<field
+								name="genericTitle"
+								type="text"
+								filter="string"
+								size="30"
+								label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_TITLE_LABEL"
+							/>
+							<field
+								name="genericValue"
+								type="text"
+								filter="string"
+								size="30"
+								label="PLG_SCHEMAORG_BOOK_FIELD_GENERIC_VALUE_LABEL"
+							/>
+						</form>
+					
+					</field>
 					
 				</form>
 			</field>
