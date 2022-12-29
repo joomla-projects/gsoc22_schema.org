@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <extension type="plugin" group="schemaorg" method="upgrade">
-	<name>plg_schemaorg_recipe</name>
+	<name>plg_schemaorg_person</name>
 	<author>Joomla! Project</author>
 	<creationDate>June 2022</creationDate>
 	<copyright>(C) 2022 Open Source Matters, Inc.</copyright>
@@ -8,14 +8,14 @@
 	<authorEmail>admin@joomla.org</authorEmail>
 	<authorUrl>www.joomla.org</authorUrl>
 	<version>__DEPLOY_VERSION__</version>
-	<description>PLG_SCHEMAORG_RECIPE_XML_DESCRIPTION</description>
+	<description>PLG_SCHEMAORG_PERSON_XML_DESCRIPTION</description>
 	<files>
-		<filename plugin="recipe">recipe.php</filename>
+		<filename plugin="person">person.php</filename>
 		<folder>forms</folder>
 	</files>
 	<languages>
-		<language tag="en-GB">language/en-GB/plg_schemaorg_recipe.ini</language>
-		<language tag="en-GB">language/en-GB/plg_schemaorg_recipe.sys.ini</language>
+		<language tag="en-GB">language/en-GB/plg_schemaorg_person.ini</language>
+		<language tag="en-GB">language/en-GB/plg_schemaorg_person.sys.ini</language>
 	</languages>
 	<config>
 		<fields name="params">

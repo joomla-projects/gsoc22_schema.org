@@ -12,8 +12,8 @@ namespace Joomla\CMS\Schemaorg;
 use Joomla\CMS\Event\GenericEvent;
 use Joomla\CMS\Event\Table\AbstractEvent;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\Database\ParameterType;
 use Joomla\Event\EventInterface;
 use Joomla\Registry\Registry;
 
@@ -27,15 +27,17 @@ trait SchemaorgPluginTrait
     /**
      * Add a new option to schemaType list field in schema form
      *
-     * @param   Form $form  Form to manipulate
-     * @param   String $name Name of the schema type eg: "Recipe", "Blog" etc
+     * @param   EventInterface $event
      *
      * @return  boolean
      *
      * @since   4.0.0
      */
-    protected function addSchemaType(Form $form, string $name)
+    protected function addSchemaType(EventInterface $event)
     {
+        $form = $event->getArgument('subject');
+        $name = $this->pluginName;
+
         if (!$form || !$name) {
             return false;
         }
@@ -72,7 +74,11 @@ trait SchemaorgPluginTrait
             if (!$isNew) {
                 $res = $db->getQuery(true)
                 ->delete($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $table->id);
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $table->id, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
+
                 $db->setQuery($res)->execute();
             }
 
@@ -114,6 +120,7 @@ trait SchemaorgPluginTrait
     public function updateSchemaForm(EventInterface $event)
     {
         $data = $event->getArgument('subject');
+        $context = $event->getArgument('context');
 
         if (!is_object($data)) {
             return false;
@@ -127,7 +134,10 @@ trait SchemaorgPluginTrait
                 $query = $db->getQuery(true)
                 ->select('*')
                 ->from($db->quoteName('#__schemaorg'))
-                ->where('itemId = ' . $itemId);
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $itemId, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
 
                 $results = $db->setQuery($query)->loadAssoc();
 
@@ -136,9 +146,8 @@ trait SchemaorgPluginTrait
                 }
 
                 $schemaType = $results['schemaType'];
-                $data->schema = [];
-                $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
                 $data->schema['schemaType'] = $schemaType;
+                $data->schema['schema'] = json_encode(json_decode($results['schema']), JSON_PRETTY_PRINT);
 
                 $form = json_decode($results['schemaForm'], true);
 
@@ -168,7 +177,51 @@ trait SchemaorgPluginTrait
                 $data->schema['itemId'] = $itemId;
             }
         }
-        $event->setArgument('subject', $data);
+        return true;
+    }
+
+    /**
+     * Call update schema function only if the plugin is not listed in allowed or forbidden
+     *
+     * @param   EventInterface $event
+     *
+     * @return  boolean
+     *
+     * @since   4.0.0
+     */
+    public function isSchemaSupported(EventInterface $event)
+    {
+        $data = $event->getArgument('subject');
+        $context = $event->getArgument('context');
+
+        if (!is_object($data)) {
+            return false;
+        } else {
+            $itemId = $data->id ?? 0;
+            if (!isset($data->schema) && $itemId > 0) {
+                $db = $this->db;
+
+                $query = $db->getQuery(true)
+                ->select('*')
+                ->from($db->quoteName('#__schemaorg'))
+                ->where($db->quoteName('itemId') . '= :itemId')
+                ->bind(':itemId', $itemId, ParameterType::INTEGER)
+                ->where($db->quoteName('context') . '= :context')
+                ->bind(':context', $context, ParameterType::STRING);
+
+                $results = $db->setQuery($query)->loadAssoc();
+
+                if (empty($results)) {
+                    return false;
+                }
+
+                $schemaType = $results['schemaType'];
+
+                if ($this->pluginName != $schemaType) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -222,7 +275,10 @@ trait SchemaorgPluginTrait
      */
     public function pushSchema()
     {
-        $itemId = $this->app->getInput()->getInt('id');
+        $itemId = (int) $this->app->getInput()->getInt('id');
+        $option = $this->app->getInput()->get('option');
+        $view = $this->app->getInput()->get('view');
+        $context = $option . '.' . $view;
 
         if ($itemId > 0) {
             // Load the table data from the database
@@ -230,13 +286,18 @@ trait SchemaorgPluginTrait
             $query = $db->getQuery(true)
             ->select('*')
             ->from($db->quoteName('#__schemaorg'))
-            ->where('itemId = ' . $itemId);
+            ->where($db->quoteName('itemId') . '= :itemId')
+            ->bind(':itemId', $itemId, ParameterType::INTEGER)
+            ->where($db->quoteName('context') . '= :context')
+            ->bind(':context', $context, ParameterType::STRING);
+
             $db->setQuery($query);
             $results = $db->loadAssoc();
 
-            if (!$results) {
-                return;
+            if (!$results || !$this->isSupported($context) || $results['schemaType'] != $this->pluginName) {
+                return false;
             }
+
             $schema = $results['schema'];
 
             if (!empty($schema)) {
@@ -244,6 +305,7 @@ trait SchemaorgPluginTrait
                 $wa->addInlineScript($schema, ['position' => 'after'], ['type' => 'application/ld+json']);
             }
         }
+        return true;
     }
 
     /**
@@ -384,5 +446,115 @@ trait SchemaorgPluginTrait
     {
         //Write your code for extra filteration
         return $schema;
+    }
+
+    /**
+     * Get the schemaorg for a given ID
+     *
+     * @param   int|null $schemaorgId ID of the schemaorg
+     *
+     * @return  CMSObject|boolean  Object on success, false on failure.
+     *
+     * @since   4.0.0
+     */
+    protected function getSchemaorg(int $schemaorgId = null)
+    {
+        $schemaorgId = !empty($schemaorgId) ? $schemaorgId : $this->app->input->getInt('schemaorg_id');
+
+        if (is_array($schemaorgId)) {
+            return false;
+        }
+
+        return $this->app->bootComponent('com_schemaorg')
+            ->getMVCFactory()
+            ->createModel('Schemaorg', 'Administrator', ['ignore_request' => true])
+            ->getItem($schemaorgId);
+    }
+
+    /**
+     * Check if the current plugin should execute schemaorg related activities
+     *
+     * @param   string  $context
+     *
+     * @return boolean
+     *
+     * @since   4.0.0
+     */
+    protected function isSupported($context)
+    {
+        if (!$this->checkAllowedAndForbiddenlist($context) || !$this->checkExtensionSupport($context, $this->supportFunctionality)) {
+            return false;
+        }
+
+        $parts = explode('.', $context);
+
+        // We need at least the extension + view for loading the table fields
+        if (count($parts) < 2) {
+            return false;
+        }
+
+        $component = $this->app->bootComponent($parts[0]);
+
+        if (
+            !$component instanceof SchemaorgServiceInterface
+            || !$component->supportSchemaFunctionality($this->supportFunctionality, $context)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Check if the context is listed in the allowed of forbidden lists and return the result.
+     *
+     * @param   string $context Context to check
+     *
+     * @return  boolean
+     */
+    protected function checkAllowedAndForbiddenlist($context)
+    {
+        $allowedlist = \array_filter((array) $this->params->get('allowedlist', []));
+        $forbiddenlist = \array_filter((array) $this->params->get('forbiddenlist', []));
+
+        if (!empty($allowedlist)) {
+            foreach ($allowedlist as $allowed) {
+                if ($context === $allowed) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        foreach ($forbiddenlist as $forbidden) {
+            if ($context === $forbidden) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if the context supports a specific functionality.
+     *
+     * @param   string  $context       Context to check
+     * @param   string  $functionality The functionality
+     *
+     * @return  boolean
+     */
+    protected function checkExtensionSupport($context, $functionality)
+    {
+        $parts = explode('.', $context);
+
+        $component = $this->app->bootComponent($parts[0]);
+
+        if (
+            !$component instanceof SchemaorgServiceInterface
+            || !$component->supportSchemaFunctionality($functionality, $context)
+        ) {
+            return false;
+        }
+        return true;
     }
 }

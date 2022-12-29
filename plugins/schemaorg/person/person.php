@@ -13,9 +13,9 @@ use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
+use Joomla\CMS\Schemaorg\SchemaorgServiceInterface;
 use Joomla\CMS\Form\FormHelper;
 use Joomla\CMS\Event\AbstractEvent;
-use Joomla\Registry\Registry;
 use Joomla\Event\SubscriberInterface;
 
 /**
@@ -23,7 +23,7 @@ use Joomla\Event\SubscriberInterface;
  *
  * @since  4.0.0
  */
-class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
+class PlgSchemaorgPerson extends CMSPlugin implements SubscriberInterface
 {
     use SchemaorgPluginTrait;
 
@@ -63,7 +63,7 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
      * @var   string
      * @since 4.0.0
      */
-    protected $pluginName = 'Book';
+    protected $pluginName = 'Person';
 
     /**
      * Returns an array of events this subscriber will listen to.
@@ -137,22 +137,5 @@ class PlgSchemaorgBook extends CMSPlugin implements SubscriberInterface
         }
         $this->storeSchemaToStandardLocation($event);
         return true;
-    }
-
-
-
-    /**
-     *  To add plugin specific functions
-     *
-     *  @param   Registry $schema Schema form
-     *
-     *  @return  Registry $schema Updated schema form
-     */
-    public function cleanupIndividualSchema(Registry $schema)
-    {
-        if (is_object($schema)) {
-            $schema = $this->cleanupDate($schema, ['datePublished']);
-        }
-        return $schema;
     }
 }

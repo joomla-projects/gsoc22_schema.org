@@ -50,6 +50,22 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
     protected $app;
 
     /**
+     * The name of the supported name to check against
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $supportFunctionality = 'core.state';
+
+    /**
+     * The name of the schema form
+     *
+     * @var   string
+     * @since 4.0.0
+     */
+    protected $pluginName = 'BlogPosting';
+
+    /**
      * Returns an array of events this subscriber will listen to.
      *
      * @return  array
@@ -59,11 +75,28 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onSchemaPrepareData'                  => 'updateSchemaForm',
+            'onSchemaPrepareData'                  => 'onSchemaPrepareData',
             'onSchemaPrepareForm'                  => 'onSchemaPrepareForm',
             'onSchemaAfterSave'                    => 'onSchemaAfterSave',
             'onSchemaBeforeCompileHead'            => 'pushSchema',
         ];
+    }
+
+    /**
+     *  Update existing schema form with data from database
+     *
+     *  @param   $data  The form to be altered.
+     *
+     *  @return  boolean
+     */
+    public function onSchemaPrepareData(AbstractEvent $event)
+    {
+        $context = $event->getArgument('context');
+        if (!$this->isSupported($context) || !$this->isSchemaSupported($event)) {
+            return false;
+        }
+        $this->updateSchemaForm($event);
+        return true;
     }
 
      /**
@@ -76,16 +109,15 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
     public function onSchemaPrepareForm(AbstractEvent $event)
     {
         $form = $event->getArgument('subject');
-
-        if ($form->getName() != 'com_content.article') {
-            return;
+        $context = $form->getName();
+        if (!$this->isSupported($context)) {
+            return false;
         }
-
-        $this->addSchemaType($form, 'BlogPosting');
-
+        $this->addSchemaType($event);
         //Load the form fields
         FormHelper::addFormPath(__DIR__ . '/forms');
         $form->loadFile('schema');
+        return true;
     }
 
     /**
@@ -100,10 +132,11 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
         $data = $event->getArgument('data')->toArray();
         $form = $data['schema']['schemaType'];
 
-        if ($form != 'BlogPosting') {
-            return;
+        if ($form != $this->pluginName) {
+            return false;
         }
         $this->storeSchemaToStandardLocation($event);
+        return true;
     }
 
     /**
@@ -111,7 +144,7 @@ class PlgSchemaorgBlogposting extends CMSPlugin implements SubscriberInterface
      *
      *  @param   Registry $schema Schema form
      *
-     *  @return  boolean
+     *  @return  Registry $schema Updated schema form
      */
     public function cleanupIndividualSchema(Registry $schema)
     {

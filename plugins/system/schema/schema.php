@@ -15,6 +15,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\EventInterface;
 use Joomla\Event\SubscriberInterface;
 use Joomla\CMS\Event\AbstractEvent;
+use Joomla\CMS\Schemaorg\SchemaorgPluginTrait;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Registry\Registry;
@@ -26,6 +27,8 @@ use Joomla\Registry\Registry;
  */
 class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
 {
+    use SchemaorgPluginTrait;
+
     /**
      * @var    \Joomla\Database\DatabaseDriver
      *
@@ -86,17 +89,17 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
         $context = $event->getArgument('0');
         $data = $event->getArgument('1');
 
-        // Check if we are manipulating a valid form.
-        if (!in_array($context, ['com_content.article'])) {
+        if ($this->app->isClient('site') || !$this->isSupported($context)) {
             return true;
         }
 
-        $dispatcher = Factory::getApplication()->getDispatcher();
+        $dispatcher = $this->app->getDispatcher();
 
         $event   = AbstractEvent::create(
             'onSchemaPrepareData',
             [
                 'subject' => $data,
+                'context' => $context
             ]
         );
 
@@ -115,11 +118,9 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
     public function onContentPrepareForm(EventInterface $event)
     {
         $form = $event->getArgument('0');
-
-        // Check if we are manipulating a valid form
         $context = $form->getName();
 
-        if (!in_array($context, ['com_content.article'])) {
+        if ($this->app->isClient('site') || !$this->isSupported($context)) {
             return true;
         }
 
@@ -153,11 +154,6 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
     public function onContentAfterSave(EventInterface $event)
     {
         $context = $event->getArgument('0');
-
-        if (!in_array($context, ['com_content.article'])) {
-            return true;
-        }
-
         $table = $event->getArgument('1');
         $isNew = $event->getArgument('2');
         $data = $event->getArgument('3');
@@ -190,11 +186,6 @@ class PlgSystemSchema extends CMSPlugin implements SubscriberInterface
      */
     public function onBeforeCompileHead()
     {
-        $context = $this->app;
-        if (!$this->app->isClient('Site') && $context === 'com_content.article') {
-            return;
-        }
-
         $dispatcher = Factory::getApplication()->getDispatcher();
 
         $event   = AbstractEvent::create(
